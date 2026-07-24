@@ -3,6 +3,7 @@ import BaseLayout from './BaseLayout.astro';
 import { useTranslations, type Lang } from '../i18n/ui';
 import { estimateReadingTime } from '../lib/readingTime';
 import CategoryBadge from '../components/CategoryBadge.astro';
+import { SITE } from '../site.config';
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
@@ -12,7 +13,7 @@ interface Props {
 
 const { entry, lang } = Astro.props;
 const t = useTranslations(lang);
-const { title, description, pubDate, updatedDate, tags, category } = entry.data;
+const { title, description, pubDate, updatedDate, tags, category, heroImage } = entry.data;
 
 const minutes = estimateReadingTime(entry.body ?? '', lang);
 const dateLocale = lang === 'en' ? 'en-US' : 'ko-KR';
@@ -21,9 +22,32 @@ const formattedDate = pubDate.toLocaleDateString(dateLocale, dateOpts);
 const formattedUpdated = updatedDate?.toLocaleDateString(dateLocale, dateOpts);
 
 const backHref = lang === 'en' ? '/en/' : '/';
+
+const postURL = new URL(Astro.url.pathname, Astro.site).toString();
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description,
+  url: postURL,
+  datePublished: pubDate.toISOString(),
+  dateModified: (updatedDate ?? pubDate).toISOString(),
+  inLanguage: lang,
+  author: { '@type': 'Person', name: SITE.author },
+  publisher: { '@type': 'Person', name: SITE.author },
+};
 ---
 
-<BaseLayout title={title} description={description} lang={lang}>
+<BaseLayout
+  title={title}
+  description={description}
+  lang={lang}
+  image={heroImage}
+  type="article"
+  publishedTime={pubDate}
+  modifiedTime={updatedDate}
+  structuredData={structuredData}
+>
   <article>
     <header class="post-header">
       <CategoryBadge category={category} lang={lang} />

@@ -18,3 +18,10 @@ export const CATEGORIES = [
 ] as const;
 
 export type CategoryId = (typeof CATEGORIES)[number]['id'];
+
+// Paste the verification codes Google Search Console / Naver Search Advisor
+// give you when you add this site as a property. Leave blank to omit the tag.
+export const SEO_VERIFICATION = {
+  google: '',
+  naver: '',
+} as const;

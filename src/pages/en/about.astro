@@ -5,7 +5,13 @@ import { SITE } from '../../site.config';
 const title = 'About';
 ---
 
-<BaseLayout title={title} description={SITE.description.en} lang="en" active="about">
+<BaseLayout
+  title={title}
+  description={SITE.description.en}
+  lang="en"
+  active="about"
+  alternateUrl={`${SITE.url}/about/`}
+>
   <h1 class="page-title">{title}</h1>
   <div class="prose">
     <p>

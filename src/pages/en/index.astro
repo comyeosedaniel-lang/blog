@@ -11,9 +11,25 @@ const t = useTranslations('en');
 const posts = (await getCollection('blog', ({ id, data }) => {
   return id.startsWith('en/') && (import.meta.env.DEV || !data.draft);
 })).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE.title,
+  url: `${SITE.url}/en/`,
+  inLanguage: 'en',
+};
 ---
 
-<BaseLayout title={SITE.title} description={SITE.description.en} lang="en" active="home" sidebar>
+<BaseLayout
+  title={SITE.title}
+  description={SITE.description.en}
+  lang="en"
+  active="home"
+  sidebar
+  alternateUrl={`${SITE.url}/`}
+  structuredData={structuredData}
+>
   <Hero slot="hero" title={SITE.title} />
   <h1 class="page-title">{t('home.recent')}</h1>
   {posts.length === 0 ? (

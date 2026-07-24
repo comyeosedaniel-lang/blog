@@ -5,7 +5,13 @@ import { SITE } from '../site.config';
 const title = '소개';
 ---
 
-<BaseLayout title={title} description={SITE.description.ko} lang="ko" active="about">
+<BaseLayout
+  title={title}
+  description={SITE.description.ko}
+  lang="ko"
+  active="about"
+  alternateUrl={`${SITE.url}/en/about/`}
+>
   <h1 class="page-title">{title}</h1>
   <div class="prose">
     <p>
