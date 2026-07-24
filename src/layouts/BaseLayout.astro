@@ -7,9 +7,10 @@ import '@fontsource/noto-serif-kr/400.css';
 import '@fontsource/noto-serif-kr/700.css';
 import '../styles/global.css';
 
-import { SITE } from '../site.config';
+import { SITE, type CategoryId } from '../site.config';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import CategoryTree from '../components/CategoryTree.astro';
 import type { Lang } from '../i18n/ui';
 
 interface Props {
@@ -17,9 +18,11 @@ interface Props {
   description: string;
   lang: Lang;
   active?: 'home' | 'about';
+  sidebar?: boolean;
+  activeCategory?: CategoryId;
 }
 
-const { title, description, lang, active } = Astro.props;
+const { title, description, lang, active, sidebar = false, activeCategory } = Astro.props;
 const pageTitle = title === SITE.title ? title : `${title} · ${SITE.title}`;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -60,8 +63,17 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
   <body>
     <Header lang={lang} active={active} />
     <slot name="hero" />
-    <main class="container">
-      <slot />
+    <main class={sidebar ? 'container container--wide' : 'container'}>
+      {sidebar ? (
+        <div class="layout-split">
+          <CategoryTree lang={lang} activeCategory={activeCategory} />
+          <div class="layout-split__content">
+            <slot />
+          </div>
+        </div>
+      ) : (
+        <slot />
+      )}
     </main>
     <Footer lang={lang} />
   </body>

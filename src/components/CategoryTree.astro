@@ -1,0 +1,127 @@
+---
+import { getCollection } from 'astro:content';
+import { CATEGORIES, type CategoryId } from '../site.config';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  activeCategory?: CategoryId;
+}
+
+const { lang, activeCategory } = Astro.props;
+const t = useTranslations(lang);
+const prefix = lang === 'en' ? 'en/' : 'ko/';
+const basePath = lang === 'en' ? '/en' : '';
+
+const posts = await getCollection('blog', ({ id, data }) => {
+  return id.startsWith(prefix) && (import.meta.env.DEV || !data.draft);
+});
+
+const grouped = CATEGORIES.map((cat) => ({
+  id: cat.id,
+  label: lang === 'en' ? cat.en : cat.ko,
+  posts: posts
+    .filter((p) => p.data.category === cat.id)
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
+}));
+---
+
+<nav class="category-tree" aria-label={lang === 'en' ? 'Categories' : '카테고리'}>
+  <a class="category-tree__all" href={`${basePath}/`}>{t('category.all')}</a>
+  {
+    grouped.map((cat) => (
+      <div class="category-tree__group">
+        <a
+          class="category-tree__category"
+          href={`${basePath}/category/${cat.id}/`}
+          aria-current={cat.id === activeCategory ? 'page' : undefined}
+        >
+          {cat.label}
+        </a>
+        {cat.posts.length > 0 && (
+          <ul class="category-tree__posts">
+            {cat.posts.map((entry) => {
+              const slug = entry.id.replace(/^(ko|en)\//, '');
+              const href = `${basePath}/blog/${slug}/`;
+              return (
+                <li>
+                  <a href={href} class="category-tree__post-title" title={entry.data.title}>
+                    {entry.data.title}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    ))
+  }
+</nav>
+
+<style>
+  .category-tree {
+    position: sticky;
+    top: 5.5rem;
+    font-size: 0.875rem;
+  }
+
+  .category-tree__all {
+    display: block;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    margin-bottom: 1.25rem;
+  }
+
+  .category-tree__all:hover {
+    color: var(--accent);
+  }
+
+  .category-tree__group {
+    margin-bottom: 1.5rem;
+  }
+
+  .category-tree__category {
+    display: block;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+  }
+
+  .category-tree__category:hover,
+  .category-tree__category[aria-current='page'] {
+    color: var(--accent);
+  }
+
+  .category-tree__posts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 1px solid var(--border);
+  }
+
+  .category-tree__post-title {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 0.3rem 0 0.3rem 0.85rem;
+  }
+
+  .category-tree__post-title:hover {
+    color: var(--accent);
+  }
+
+  @media (max-width: 48rem) {
+    .category-tree {
+      position: static;
+    }
+  }
+</style>

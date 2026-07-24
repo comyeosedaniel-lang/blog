@@ -18,13 +18,7 @@ const posts = (await getCollection('blog', ({ id, data }) => {
 })).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<BaseLayout title={meta.en} description={SITE.description.en} lang="en">
-  <nav class="category-nav" aria-label="Categories">
-    <a href="/en/">{t('category.all')}</a>
-    {CATEGORIES.map((c) => (
-      <a href={`/en/category/${c.id}/`} aria-current={c.id === category ? 'page' : undefined}>{c.en}</a>
-    ))}
-  </nav>
+<BaseLayout title={meta.en} description={SITE.description.en} lang="en" sidebar activeCategory={meta.id}>
   <h1 class="page-title">{meta.en}</h1>
   {posts.length === 0 ? (
     <p class="empty-state">{t('home.empty')}</p>
