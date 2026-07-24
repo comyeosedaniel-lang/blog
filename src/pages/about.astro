@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../site.config';
+
+const title = '소개';
+---
+
+<BaseLayout title={title} description={SITE.description.ko} lang="ko" active="about">
+  <h1 class="page-title">{title}</h1>
+  <div class="prose">
+    <p>
+      이 페이지는 아직 비어 있어요. <code>src/pages/about.astro</code> 파일을 열어
+      자기소개, 하는 일, 연락처 등 원하는 내용으로 자유롭게 채워보세요.
+    </p>
+  </div>
+</BaseLayout>

@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE } from '../../site.config';
+
+const title = 'About';
+---
+
+<BaseLayout title={title} description={SITE.description.en} lang="en" active="about">
+  <h1 class="page-title">{title}</h1>
+  <div class="prose">
+    <p>
+      This page is still empty. Open <code>src/pages/en/about.astro</code> and fill it in
+      with a bio, what you do, or how to reach you.
+    </p>
+  </div>
+</BaseLayout>

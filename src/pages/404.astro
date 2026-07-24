@@ -1,0 +1,13 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../site.config';
+import { useTranslations } from '../i18n/ui';
+
+const t = useTranslations('ko');
+---
+
+<BaseLayout title={t('404.title')} description={SITE.description.ko} lang="ko">
+  <h1 class="page-title">{t('404.title')}</h1>
+  <p class="empty-state">{t('404.body')}</p>
+  <a class="back-link" href="/">&larr; {t('404.home')}</a>
+</BaseLayout>

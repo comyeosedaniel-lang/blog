@@ -1,0 +1,22 @@
+---
+import { getCollection, render } from 'astro:content';
+import PostLayout from '../../../layouts/PostLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ id, data }) => {
+    return id.startsWith('en/') && (import.meta.env.DEV || !data.draft);
+  });
+
+  return posts.map((entry) => ({
+    params: { slug: entry.id.replace(/^en\//, '') },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<PostLayout entry={entry} lang="en">
+  <Content />
+</PostLayout>

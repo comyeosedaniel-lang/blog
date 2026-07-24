@@ -1,0 +1,31 @@
+---
+import { SITE } from '../site.config';
+import { useTranslations, type Lang } from '../i18n/ui';
+import ThemeToggle from './ThemeToggle.astro';
+
+interface Props {
+  lang: Lang;
+  active?: 'home' | 'about';
+}
+
+const { lang, active } = Astro.props;
+const t = useTranslations(lang);
+
+const home = lang === 'en' ? '/en/' : '/';
+const about = lang === 'en' ? '/en/about/' : '/about/';
+const langSwitch = lang === 'en' ? '/' : '/en/';
+---
+
+<header class="site-header">
+  <div class="container site-header__row">
+    <p class="site-header__title">
+      <a href={home}>{SITE.title}</a>
+    </p>
+    <nav class="site-nav" aria-label="Primary">
+      <a href={home} aria-current={active === 'home' ? 'page' : undefined}>{t('nav.home')}</a>
+      <a href={about} aria-current={active === 'about' ? 'page' : undefined}>{t('nav.about')}</a>
+      <a href={langSwitch}>{t('nav.lang')}</a>
+      <ThemeToggle lang={lang} />
+    </nav>
+  </div>
+</header>

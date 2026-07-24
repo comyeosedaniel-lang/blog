@@ -1,0 +1,23 @@
+---
+import { SITE } from '../site.config';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const rss = lang === 'en' ? '/en/rss.xml' : '/rss.xml';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__row">
+    <p>&copy; {year} {SITE.author}</p>
+    <div class="footer-links">
+      <a href={rss}>{t('footer.rss')}</a>
+      <a href={SITE.github} target="_blank" rel="noopener noreferrer">{t('footer.source')}</a>
+    </div>
+  </div>
+</footer>

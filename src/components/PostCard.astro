@@ -1,0 +1,31 @@
+---
+import { useTranslations, type Lang } from '../i18n/ui';
+import { estimateReadingTime } from '../lib/readingTime';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  entry: CollectionEntry<'blog'>;
+  lang: Lang;
+}
+
+const { entry, lang } = Astro.props;
+const t = useTranslations(lang);
+
+const slug = entry.id.replace(/^(ko|en)\//, '');
+const href = lang === 'en' ? `/en/blog/${slug}/` : `/blog/${slug}/`;
+const minutes = estimateReadingTime(entry.body ?? '', lang);
+
+const dateLocale = lang === 'en' ? 'en-US' : 'ko-KR';
+const formattedDate = entry.data.pubDate.toLocaleDateString(dateLocale, {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<article class="post-card">
+  <time class="post-card__date" datetime={entry.data.pubDate.toISOString()}>{formattedDate}</time>
+  <h2 class="post-card__title"><a href={href}>{entry.data.title}</a></h2>
+  <p class="post-card__desc">{entry.data.description}</p>
+  <p class="post-card__meta">{minutes} {t('post.readingTime')}</p>
+</article>
