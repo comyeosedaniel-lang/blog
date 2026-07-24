@@ -25,3 +25,4 @@ pnpm-debug.log*
 
 # oh-my-claudecode local session state
 .omc/
+.claude/
