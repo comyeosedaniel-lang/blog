@@ -2,6 +2,7 @@
 import BaseLayout from './BaseLayout.astro';
 import { useTranslations, type Lang } from '../i18n/ui';
 import { estimateReadingTime } from '../lib/readingTime';
+import CategoryBadge from '../components/CategoryBadge.astro';
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
@@ -11,7 +12,7 @@ interface Props {
 
 const { entry, lang } = Astro.props;
 const t = useTranslations(lang);
-const { title, description, pubDate, updatedDate, tags } = entry.data;
+const { title, description, pubDate, updatedDate, tags, category } = entry.data;
 
 const minutes = estimateReadingTime(entry.body ?? '', lang);
 const dateLocale = lang === 'en' ? 'en-US' : 'ko-KR';
@@ -25,6 +26,7 @@ const backHref = lang === 'en' ? '/en/' : '/';
 <BaseLayout title={title} description={description} lang={lang}>
   <article>
     <header class="post-header">
+      <CategoryBadge category={category} lang={lang} />
       <p class="post-header__meta">
         <time datetime={pubDate.toISOString()}>{formattedDate}</time>
         {' · '}{minutes} {t('post.readingTime')}

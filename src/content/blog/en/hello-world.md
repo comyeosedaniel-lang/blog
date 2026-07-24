@@ -2,6 +2,7 @@
 title: Hello, and welcome
 description: An example post for the mylineal blog, showing the frontmatter and markdown you'll use for real posts.
 pubDate: 2026-07-25
+category: dev
 tags: [example, guide]
 ---
 

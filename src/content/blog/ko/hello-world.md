@@ -2,6 +2,7 @@
 title: 첫 글, 그리고 이 블로그에 대해
 description: mylineal 블로그의 예시 글입니다. 새 글을 쓸 때 참고할 프런트매터와 마크다운 문법을 모아뒀어요.
 pubDate: 2026-07-25
+category: dev
 tags: [예시, 안내]
 ---
 

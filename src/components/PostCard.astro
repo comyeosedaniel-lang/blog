@@ -1,6 +1,7 @@
 ---
 import { useTranslations, type Lang } from '../i18n/ui';
 import { estimateReadingTime } from '../lib/readingTime';
+import CategoryBadge from './CategoryBadge.astro';
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
@@ -24,6 +25,7 @@ const formattedDate = entry.data.pubDate.toLocaleDateString(dateLocale, {
 ---
 
 <article class="post-card">
+  <CategoryBadge category={entry.data.category} lang={lang} />
   <time class="post-card__date" datetime={entry.data.pubDate.toISOString()}>{formattedDate}</time>
   <h2 class="post-card__title"><a href={href}>{entry.data.title}</a></h2>
   <p class="post-card__desc">{entry.data.description}</p>

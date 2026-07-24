@@ -1,0 +1,15 @@
+---
+import { CATEGORIES, type CategoryId } from '../site.config';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  category: CategoryId;
+  lang: Lang;
+}
+
+const { category, lang } = Astro.props;
+const meta = CATEGORIES.find((c) => c.id === category)!;
+const href = lang === 'en' ? `/en/category/${category}/` : `/category/${category}/`;
+---
+
+<a class="category-badge" href={href}>{meta[lang]}</a>
