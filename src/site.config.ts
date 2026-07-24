@@ -12,6 +12,7 @@ export const SITE = {
 
 export const CATEGORIES = [
   { id: 'dev', ko: '개발 이야기', en: 'Dev Stories' },
+  { id: 'book', ko: '책 이야기', en: 'Book Stories' },
   { id: 'life', ko: '나의 이야기', en: 'My Story' },
   { id: 'us', ko: '우리의 이야기', en: 'Our Story' },
 ] as const;

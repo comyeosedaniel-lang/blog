@@ -25,6 +25,7 @@ collections:
         default: "life"
         options:
           - { label: "개발 이야기", value: "dev" }
+          - { label: "책 이야기", value: "book" }
           - { label: "나의 이야기", value: "life" }
           - { label: "우리의 이야기", value: "us" }
       - { label: "태그", name: "tags", widget: "list", required: false }
@@ -47,6 +48,7 @@ collections:
         default: "life"
         options:
           - { label: "Dev Stories", value: "dev" }
+          - { label: "Book Stories", value: "book" }
           - { label: "My Story", value: "life" }
           - { label: "Our Story", value: "us" }
       - { label: "Tags", name: "tags", widget: "list", required: false }
