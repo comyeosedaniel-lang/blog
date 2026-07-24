@@ -1,0 +1,76 @@
+---
+import { Image } from 'astro:assets';
+import heroImage from '../assets/hero.jpeg';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<div class="hero">
+  <Image
+    src={heroImage}
+    alt=""
+    class="hero__image"
+    widths={[640, 960, 1400, 2000, 2752]}
+    sizes="100vw"
+    quality={80}
+    loading="eager"
+    fetchpriority="high"
+  />
+  <div class="hero__overlay"></div>
+  <div class="hero__content">
+    <h1 class="hero__title">{title}</h1>
+  </div>
+</div>
+
+<style>
+  .hero {
+    position: relative;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    height: min(70vh, 640px);
+    min-height: 320px;
+    overflow: hidden;
+  }
+
+  .hero__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 40%;
+    display: block;
+    border-radius: 0;
+  }
+
+  .hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.08) 45%, transparent 65%);
+  }
+
+  .hero__content {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 2.5rem 1.5rem;
+    max-width: 42rem;
+    margin: 0 auto;
+  }
+
+  .hero__title {
+    color: #fff8f4;
+    font-size: clamp(1.75rem, 1.2rem + 2.5vw, 3rem);
+    margin: 0;
+    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.5);
+  }
+
+  @media (max-width: 30rem) {
+    .hero {
+      height: min(56vh, 480px);
+    }
+  }
+</style>

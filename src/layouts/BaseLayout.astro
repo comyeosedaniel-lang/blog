@@ -59,6 +59,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
   </head>
   <body>
     <Header lang={lang} active={active} />
+    <slot name="hero" />
     <main class="container">
       <slot />
     </main>
