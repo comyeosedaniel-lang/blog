@@ -1,6 +1,6 @@
 const ALLOWED_ORIGIN = 'https://blog.mylineal.com';
 const SITE_TITLE = '나의 삶, 이야기 그리고 커리어';
-const FROM_ADDRESS = 'onboarding@resend.dev';
+const FROM_ADDRESS = `${SITE_TITLE} <newsletter@mylineal.com>`;
 
 function corsHeaders(origin) {
   const allow = origin === ALLOWED_ORIGIN ? origin : ALLOWED_ORIGIN;

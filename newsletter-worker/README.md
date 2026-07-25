@@ -33,7 +33,7 @@ npx wrangler secret put ADMIN_KEY
 
 ## 발신 주소
 
-지금은 Resend의 공용 주소(`onboarding@resend.dev`)로 발송돼요. 나중에 `mylineal.com` 도메인을 Resend에 인증하면 `newsletter@mylineal.com` 같은 자체 주소로 바꿀 수 있어요 (Cloudflare DNS에 레코드 추가 필요).
+`mylineal.com`이 Resend에 인증돼 있어서 `newsletter@mylineal.com`으로 발송돼요. 이 도메인은 클릭/오픈 트래킹이 꺼져 있는 상태라 링크가 `resend-clicks.com` 같은 추적용 도메인으로 바뀌지 않아요 (백신 프로그램이 그런 추적 링크를 악성으로 오탐하는 경우가 있어서 일부러 꺼둠).
 
 ## 구독자 확인/직접 조작
 
