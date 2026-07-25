@@ -1,0 +1,9 @@
+name = "mylineal-comments"
+main = "src/index.js"
+compatibility_date = "2026-07-01"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mylineal-comments"
+database_id = "38395dca-b502-447b-b61a-e1c8f992bf14"

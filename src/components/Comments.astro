@@ -1,0 +1,155 @@
+---
+import { COMMENTS } from '../site.config';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  postId: string;
+  lang: Lang;
+}
+
+const { postId, lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section
+  class="comments"
+  data-post-id={postId}
+  data-api={COMMENTS.apiUrl}
+  data-lang={lang}
+  data-empty-text={t('comments.empty')}
+  data-sending-text={t('comments.sending')}
+  data-error-text={t('comments.error')}
+  data-turnstile-required-text={t('comments.turnstileRequired')}
+>
+  <h2 class="comments__title">{t('comments.title')}</h2>
+
+  <ul class="comments__list">
+    <li class="comments__loading">{t('comments.loading')}</li>
+  </ul>
+
+  <form class="comments__form">
+    <input type="text" name="website" class="comments__honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+    <label class="comments__field">
+      <span>{t('comments.name')}</span>
+      <input type="text" name="name" required maxlength="60" />
+    </label>
+
+    <label class="comments__field">
+      <span>{t('comments.message')}</span>
+      <textarea name="message" required maxlength="2000" rows="4"></textarea>
+    </label>
+
+    <div class="cf-turnstile" data-sitekey={COMMENTS.turnstileSiteKey} data-theme="auto"></div>
+
+    <button type="submit" class="comments__submit">{t('comments.submit')}</button>
+    <p class="comments__status" role="status"></p>
+  </form>
+</section>
+
+<script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+<script>
+  function escapeHtml(str: string) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function formatDate(raw: string, lang: string) {
+    const iso = raw.includes('T') ? raw : `${raw.replace(' ', 'T')}Z`;
+    const date = new Date(iso);
+    return date.toLocaleDateString(lang === 'en' ? 'en-US' : 'ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  }
+
+  function renderComment(c: { name: string; message: string; created_at: string }, lang: string) {
+    const li = document.createElement('li');
+    li.className = 'comments__item';
+    li.innerHTML = `
+      <div class="comments__item-head">
+        <span class="comments__item-name">${escapeHtml(c.name)}</span>
+        <time class="comments__item-date">${formatDate(c.created_at, lang)}</time>
+      </div>
+      <p class="comments__item-message">${escapeHtml(c.message)}</p>
+    `;
+    return li;
+  }
+
+  document.querySelectorAll<HTMLElement>('.comments').forEach((section) => {
+    const postId = section.dataset.postId!;
+    const api = section.dataset.api!;
+    const lang = section.dataset.lang!;
+    const list = section.querySelector<HTMLUListElement>('.comments__list')!;
+    const form = section.querySelector<HTMLFormElement>('.comments__form')!;
+    const status = section.querySelector<HTMLParagraphElement>('.comments__status')!;
+
+    async function loadComments() {
+      try {
+        const res = await fetch(`${api}/comments?post=${encodeURIComponent(postId)}`);
+        const data = await res.json();
+        list.innerHTML = '';
+        if (!data.comments || data.comments.length === 0) {
+          const li = document.createElement('li');
+          li.className = 'comments__empty';
+          li.textContent = section.dataset.emptyText ?? '';
+          list.appendChild(li);
+          return;
+        }
+        for (const c of data.comments) {
+          list.appendChild(renderComment(c, lang));
+        }
+      } catch {
+        list.innerHTML = '';
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const turnstileToken = formData.get('cf-turnstile-response');
+      if (!turnstileToken) {
+        status.textContent = section.dataset.turnstileRequiredText ?? '';
+        return;
+      }
+
+      const submitBtn = form.querySelector<HTMLButtonElement>('.comments__submit')!;
+      submitBtn.disabled = true;
+      status.textContent = section.dataset.sendingText ?? '';
+
+      try {
+        const res = await fetch(`${api}/comments`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            postId,
+            name: formData.get('name'),
+            message: formData.get('message'),
+            turnstileToken,
+            website: formData.get('website'),
+          }),
+        });
+        if (!res.ok) throw new Error('request failed');
+        const data = await res.json();
+
+        const emptyEl = list.querySelector('.comments__empty');
+        emptyEl?.remove();
+        list.appendChild(renderComment(data.comment, lang));
+
+        form.reset();
+        // @ts-expect-error turnstile is loaded from an external script
+        window.turnstile?.reset();
+        status.textContent = '';
+      } catch {
+        status.textContent = section.dataset.errorText ?? '';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    loadComments();
+  });
+</script>

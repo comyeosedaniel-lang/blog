@@ -25,3 +25,10 @@ export const SEO_VERIFICATION = {
   google: '',
   naver: '',
 } as const;
+
+// Self-hosted comments (Cloudflare Worker + D1). The Turnstile site key is
+// public by design; the matching secret key lives only as a Worker secret.
+export const COMMENTS = {
+  apiUrl: 'https://mylineal-comments.comyeosedaniel.workers.dev',
+  turnstileSiteKey: '0x4AAAAAAD9lIIkdkIoee_6_',
+} as const;

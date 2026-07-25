@@ -3,6 +3,7 @@ import BaseLayout from './BaseLayout.astro';
 import { useTranslations, type Lang } from '../i18n/ui';
 import { estimateReadingTime } from '../lib/readingTime';
 import CategoryBadge from '../components/CategoryBadge.astro';
+import Comments from '../components/Comments.astro';
 import { SITE } from '../site.config';
 import type { CollectionEntry } from 'astro:content';
 
@@ -70,6 +71,8 @@ const structuredData = {
     <div class="prose">
       <slot />
     </div>
+
+    <Comments postId={entry.id} lang={lang} />
 
     <a class="back-link" href={backHref}>&larr; {t('post.back')}</a>
   </article>
