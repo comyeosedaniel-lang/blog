@@ -210,10 +210,10 @@ export default {
       }
 
       const { title, postUrl, excerpt } = body;
-      const lang = normalizeLang(body.lang);
       if (!title || !postUrl) return json({ error: 'missing title or postUrl' }, 400, origin);
 
-      const strings = t(lang);
+      // We can't be sure which language a subscriber actually reads, so the
+      // notification's wrapper text goes out in both, English first.
       const { results } = await env.DB.prepare(
         'SELECT email, unsubscribe_token FROM subscribers WHERE confirmed = 1',
       ).all();
@@ -225,12 +225,14 @@ export default {
           to: sub.email,
           subject: `[${SITE_TITLE}] ${title}`,
           htmlBody: `
-            <p>${strings.newPostIntro}</p>
+            <p>${STRINGS.en.newPostIntro}<br>${STRINGS.ko.newPostIntro}</p>
             <h2>${title}</h2>
             ${excerpt ? `<p>${excerpt}</p>` : ''}
-            <p><a href="${postUrl}" style="display:inline-block;padding:0.6em 1.2em;background:#af4c26;color:#fff;text-decoration:none;border-radius:6px;">${strings.readMore}</a></p>
+            <p><a href="${postUrl}" style="display:inline-block;padding:0.6em 1.2em;background:#af4c26;color:#fff;text-decoration:none;border-radius:6px;">${STRINGS.en.readMore} / ${STRINGS.ko.readMore}</a></p>
             <hr style="margin:2em 0;border:none;border-top:1px solid #eee;">
-            <p style="font-size:0.85em;color:#888;"><a href="${unsubscribeUrl}">${strings.unsubscribeLink}</a></p>
+            <p style="font-size:0.85em;color:#888;">
+              <a href="${unsubscribeUrl}">${STRINGS.en.unsubscribeLink}</a> · <a href="${unsubscribeUrl}">${STRINGS.ko.unsubscribeLink}</a>
+            </p>
           `,
         });
         sent += 1;
