@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
 import Hero from '../components/Hero.astro';
+import GeoRedirect from '../components/GeoRedirect.astro';
 import { SITE } from '../site.config';
 import { useTranslations } from '../i18n/ui';
 
@@ -30,6 +31,7 @@ const structuredData = {
   alternateUrl={`${SITE.url}/en/`}
   structuredData={structuredData}
 >
+  <GeoRedirect />
   <Hero slot="hero" title={SITE.title} />
   <h1 class="page-title">{t('home.recent')}</h1>
   {posts.length === 0 ? (

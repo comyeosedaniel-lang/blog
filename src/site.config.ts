@@ -38,3 +38,9 @@ export const NEWSLETTER = {
   apiUrl: 'https://mylineal-newsletter.comyeosedaniel.workers.dev',
   turnstileSiteKey: '0x4AAAAAAD9lIIkdkIoee_6_',
 } as const;
+
+// Visitor-country lookup (Cloudflare's edge geo data), served by the same
+// comments worker. Used to default non-Korean visitors to the English site.
+export const GEO = {
+  apiUrl: 'https://mylineal-comments.comyeosedaniel.workers.dev/geo',
+} as const;

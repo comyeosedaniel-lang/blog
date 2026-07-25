@@ -13,6 +13,7 @@ const t = useTranslations(lang);
 <section
   class="subscribe"
   data-api={NEWSLETTER.apiUrl}
+  data-lang={lang}
   data-sending-text={t('subscribe.sending')}
   data-success-text={t('subscribe.success')}
   data-already-text={t('subscribe.alreadySubscribed')}
@@ -56,6 +57,7 @@ const t = useTranslations(lang);
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
             email: formData.get('email'),
+            lang: section.dataset.lang,
             turnstileToken,
             website: formData.get('website'),
           }),

@@ -24,8 +24,15 @@ const langSwitch = lang === 'en' ? '/' : '/en/';
     <nav class="site-nav" aria-label="Primary">
       <a href={home} aria-current={active === 'home' ? 'page' : undefined}>{t('nav.home')}</a>
       <a href={about} aria-current={active === 'about' ? 'page' : undefined}>{t('nav.about')}</a>
-      <a href={langSwitch}>{t('nav.lang')}</a>
+      <a href={langSwitch} id="lang-switch" data-lang={lang === 'en' ? 'ko' : 'en'}>{t('nav.lang')}</a>
       <ThemeToggle lang={lang} />
     </nav>
   </div>
 </header>
+
+<script>
+  document.getElementById('lang-switch')?.addEventListener('click', (e) => {
+    const target = e.currentTarget as HTMLElement;
+    localStorage.setItem('lang-pref', target.dataset.lang ?? 'ko');
+  });
+</script>

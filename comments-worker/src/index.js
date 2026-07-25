@@ -42,6 +42,10 @@ export default {
       return new Response(null, { headers: corsHeaders(origin) });
     }
 
+    if (url.pathname === '/geo' && request.method === 'GET') {
+      return json({ country: request.cf?.country ?? null }, 200, origin);
+    }
+
     if (url.pathname === '/comments' && request.method === 'GET') {
       const postId = url.searchParams.get('post');
       if (!postId) return json({ error: 'missing post' }, 400, origin);

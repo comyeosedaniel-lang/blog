@@ -1,0 +1,24 @@
+---
+import { GEO } from '../site.config';
+---
+
+<script is:inline define:vars={{ geoUrl: GEO.apiUrl }}>
+  (function () {
+    var pref = null;
+    try {
+      pref = localStorage.getItem('lang-pref');
+    } catch (e) {}
+    if (pref) return;
+
+    fetch(geoUrl)
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (data) {
+        if (data && data.country && data.country !== 'KR') {
+          window.location.replace('/en/');
+        }
+      })
+      .catch(function () {});
+  })();
+</script>
