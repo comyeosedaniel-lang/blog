@@ -32,3 +32,9 @@ export const COMMENTS = {
   apiUrl: 'https://mylineal-comments.comyeosedaniel.workers.dev',
   turnstileSiteKey: '0x4AAAAAAD9lIIkdkIoee_6_',
 } as const;
+
+// Same Turnstile widget reused for the newsletter signup form.
+export const NEWSLETTER = {
+  apiUrl: 'https://mylineal-newsletter.comyeosedaniel.workers.dev',
+  turnstileSiteKey: '0x4AAAAAAD9lIIkdkIoee_6_',
+} as const;

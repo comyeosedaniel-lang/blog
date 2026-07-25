@@ -1,0 +1,79 @@
+---
+import { NEWSLETTER } from '../site.config';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section
+  class="subscribe"
+  data-api={NEWSLETTER.apiUrl}
+  data-sending-text={t('subscribe.sending')}
+  data-success-text={t('subscribe.success')}
+  data-already-text={t('subscribe.alreadySubscribed')}
+  data-error-text={t('subscribe.error')}
+>
+  <h2 class="subscribe__title">{t('subscribe.title')}</h2>
+  <p class="subscribe__desc">{t('subscribe.desc')}</p>
+
+  <form class="subscribe__form">
+    <input type="text" name="website" class="subscribe__honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
+    <div class="subscribe__row">
+      <input type="email" name="email" required placeholder={t('subscribe.placeholder')} />
+      <button type="submit" class="subscribe__submit">{t('subscribe.submit')}</button>
+    </div>
+    <div class="cf-turnstile" data-sitekey={NEWSLETTER.turnstileSiteKey} data-theme="auto"></div>
+    <p class="subscribe__status" role="status"></p>
+  </form>
+</section>
+
+<script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.subscribe').forEach((section) => {
+    const api = section.dataset.api!;
+    const form = section.querySelector<HTMLFormElement>('.subscribe__form')!;
+    const status = section.querySelector<HTMLParagraphElement>('.subscribe__status')!;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const turnstileToken = formData.get('cf-turnstile-response');
+      if (!turnstileToken) return;
+
+      const submitBtn = form.querySelector<HTMLButtonElement>('.subscribe__submit')!;
+      submitBtn.disabled = true;
+      status.textContent = section.dataset.sendingText ?? '';
+
+      try {
+        const res = await fetch(`${api}/subscribe`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.get('email'),
+            turnstileToken,
+            website: formData.get('website'),
+          }),
+        });
+        if (!res.ok) throw new Error('request failed');
+        const data = await res.json();
+
+        status.textContent = data.alreadySubscribed
+          ? (section.dataset.alreadyText ?? '')
+          : (section.dataset.successText ?? '');
+        form.reset();
+        // @ts-expect-error turnstile is loaded from an external script
+        window.turnstile?.reset();
+      } catch {
+        status.textContent = section.dataset.errorText ?? '';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  });
+</script>

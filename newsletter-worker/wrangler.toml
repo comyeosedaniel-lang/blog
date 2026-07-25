@@ -1,0 +1,9 @@
+name = "mylineal-newsletter"
+main = "src/index.js"
+compatibility_date = "2026-07-01"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mylineal-newsletter"
+database_id = "ad549f9f-ae62-4195-a80f-2b8da6c93d4b"
