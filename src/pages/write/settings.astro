@@ -1,0 +1,133 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE } from '../../site.config';
+
+export const prerender = false;
+---
+
+<BaseLayout title="설정" description={SITE.description.ko} lang="ko">
+  <div class="settings">
+    <h1 class="page-title">비밀번호 변경</h1>
+    <form id="change-password-form" class="settings__form">
+      <label class="settings__field">
+        <span>현재 비밀번호</span>
+        <input type="password" id="currentPassword" required autocomplete="current-password" />
+      </label>
+      <label class="settings__field">
+        <span>새 비밀번호 (8자 이상)</span>
+        <input type="password" id="newPassword" required minlength="8" autocomplete="new-password" />
+      </label>
+      <label class="settings__field">
+        <span>새 비밀번호 확인</span>
+        <input type="password" id="newPasswordConfirm" required minlength="8" autocomplete="new-password" />
+      </label>
+      <div class="settings__actions">
+        <button type="submit" class="write-btn write-btn--primary">비밀번호 변경</button>
+        <a class="write-btn" href="/write">돌아가기</a>
+      </div>
+      <p id="settings-status" class="settings__status" role="status"></p>
+    </form>
+  </div>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('change-password-form') as HTMLFormElement;
+  const status = document.getElementById('settings-status') as HTMLParagraphElement;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const currentPassword = (document.getElementById('currentPassword') as HTMLInputElement).value;
+    const newPassword = (document.getElementById('newPassword') as HTMLInputElement).value;
+    const newPasswordConfirm = (document.getElementById('newPasswordConfirm') as HTMLInputElement).value;
+
+    if (newPassword !== newPasswordConfirm) {
+      status.textContent = '새 비밀번호가 서로 달라요.';
+      return;
+    }
+
+    status.textContent = '변경하는 중...';
+
+    try {
+      const res = await fetch('/api/change-password', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        status.textContent = data.error ?? '변경에 실패했어요.';
+        return;
+      }
+      status.textContent = '비밀번호가 변경됐어요.';
+      form.reset();
+    } catch {
+      status.textContent = '변경 중 문제가 생겼어요.';
+    }
+  });
+</script>
+
+<style>
+  .settings {
+    max-width: 28rem;
+  }
+
+  .settings__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    margin-top: 1.5rem;
+  }
+
+  .settings__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+
+  .settings__field input {
+    font: inherit;
+    font-size: 0.9375rem;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.55rem 0.7rem;
+  }
+
+  .settings__actions {
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .write-btn {
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-block;
+  }
+
+  .write-btn--primary {
+    color: var(--accent-contrast);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .write-btn:hover {
+    opacity: 0.9;
+  }
+
+  .settings__status {
+    min-height: 1.2em;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+</style>

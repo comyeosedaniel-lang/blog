@@ -27,7 +27,12 @@ const authed = await Astro.session?.get('authed');
       <a href={about} aria-current={active === 'about' ? 'page' : undefined}>{t('nav.about')}</a>
       <a href={langSwitch} id="lang-switch" data-lang={lang === 'en' ? 'ko' : 'en'}>{t('nav.lang')}</a>
       {authed ? (
-        <a href="/write" class="site-nav__write-btn">글쓰기</a>
+        <>
+          <a href="/write" class="site-nav__write-btn">글쓰기</a>
+          <form method="POST" action="/api/logout" class="site-nav__logout-form">
+            <button type="submit">로그아웃</button>
+          </form>
+        </>
       ) : (
         <a href="/write/login">로그인</a>
       )}

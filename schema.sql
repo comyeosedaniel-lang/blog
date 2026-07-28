@@ -19,3 +19,8 @@ CREATE TABLE IF NOT EXISTS posts (
 
 CREATE INDEX IF NOT EXISTS idx_posts_lang_draft_pubdate ON posts (lang, draft, pub_date);
 CREATE INDEX IF NOT EXISTS idx_posts_category ON posts (category);
+
+CREATE TABLE IF NOT EXISTS admin (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  password_hash TEXT NOT NULL
+);
