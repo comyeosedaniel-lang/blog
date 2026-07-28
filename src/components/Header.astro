@@ -14,6 +14,7 @@ const t = useTranslations(lang);
 const home = lang === 'en' ? '/en/' : '/';
 const about = lang === 'en' ? '/en/about/' : '/about/';
 const langSwitch = lang === 'en' ? '/' : '/en/';
+const authed = await Astro.session?.get('authed');
 ---
 
 <header class="site-header">
@@ -25,6 +26,7 @@ const langSwitch = lang === 'en' ? '/' : '/en/';
       <a href={home} aria-current={active === 'home' ? 'page' : undefined}>{t('nav.home')}</a>
       <a href={about} aria-current={active === 'about' ? 'page' : undefined}>{t('nav.about')}</a>
       <a href={langSwitch} id="lang-switch" data-lang={lang === 'en' ? 'ko' : 'en'}>{t('nav.lang')}</a>
+      {authed && <a href="/write">글쓰기</a>}
       <ThemeToggle lang={lang} />
     </nav>
   </div>

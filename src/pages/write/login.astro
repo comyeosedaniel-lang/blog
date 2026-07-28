@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE } from '../../site.config';
+
+export const prerender = false;
+
+const error = Astro.url.searchParams.get('error');
+---
+
+<BaseLayout title="글쓰기 로그인" description={SITE.description.ko} lang="ko">
+  <h1 class="page-title">글쓰기</h1>
+  <form class="login-form" method="POST" action="/api/login">
+    <label class="login-form__field">
+      <span>비밀번호</span>
+      <input type="password" name="password" required autofocus />
+    </label>
+    {error && <p class="login-form__error">비밀번호가 맞지 않아요.</p>}
+    <button type="submit" class="login-form__submit">로그인</button>
+  </form>
+</BaseLayout>
+
+<style>
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 20rem;
+  }
+
+  .login-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  .login-form__field input {
+    font: inherit;
+    font-size: 0.9375rem;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.6rem 0.75rem;
+  }
+
+  .login-form__field input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .login-form__error {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--accent);
+  }
+
+  .login-form__submit {
+    align-self: flex-start;
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--accent-contrast);
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.6rem 1.4rem;
+    cursor: pointer;
+  }
+
+  .login-form__submit:hover {
+    opacity: 0.9;
+  }
+</style>

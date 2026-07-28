@@ -1,0 +1,120 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE, CATEGORIES } from '../../site.config';
+import { listAllPostsForAdmin } from '../../lib/posts';
+
+export const prerender = false;
+
+const posts = await listAllPostsForAdmin();
+---
+
+<BaseLayout title="글쓰기" description={SITE.description.ko} lang="ko">
+  <div class="write-dashboard">
+    <div class="write-dashboard__head">
+      <h1 class="page-title">글 관리</h1>
+      <div class="write-dashboard__actions">
+        <a class="write-btn write-btn--primary" href="/write/new">새 글쓰기</a>
+        <form method="POST" action="/api/logout">
+          <button type="submit" class="write-btn">로그아웃</button>
+        </form>
+      </div>
+    </div>
+
+    {posts.length === 0 ? (
+      <p class="empty-state">아직 글이 없어요.</p>
+    ) : (
+      <ul class="write-list">
+        {posts.map((p) => (
+          <li class="write-list__item">
+            <div class="write-list__meta">
+              <span class="write-list__lang">{p.lang === 'ko' ? '한국어' : 'English'}</span>
+              <span class="write-list__category">{CATEGORIES.find((c) => c.id === p.category)?.[p.lang]}</span>
+              {p.draft && <span class="write-list__draft">임시저장</span>}
+            </div>
+            <a class="write-list__title" href={`/write/edit/${p.id}`}>{p.title}</a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .write-dashboard__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .write-dashboard__head .page-title {
+    margin: 0;
+  }
+
+  .write-dashboard__actions {
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .write-btn {
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-block;
+  }
+
+  .write-btn--primary {
+    color: var(--accent-contrast);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .write-btn:hover {
+    opacity: 0.9;
+  }
+
+  .write-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .write-list__item {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .write-list__meta {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .write-list__draft {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .write-list__title {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .write-list__title:hover {
+    color: var(--accent);
+  }
+</style>

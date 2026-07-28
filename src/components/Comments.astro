@@ -90,7 +90,7 @@ const t = useTranslations(lang);
     async function loadComments() {
       try {
         const res = await fetch(`${api}/comments?post=${encodeURIComponent(postId)}`);
-        const data = await res.json();
+        const data = (await res.json()) as { comments?: { name: string; message: string; created_at: string }[] };
         list.innerHTML = '';
         if (!data.comments || data.comments.length === 0) {
           const li = document.createElement('li');
@@ -133,7 +133,7 @@ const t = useTranslations(lang);
           }),
         });
         if (!res.ok) throw new Error('request failed');
-        const data = await res.json();
+        const data = (await res.json()) as { comment: { name: string; message: string; created_at: string } };
 
         const emptyEl = list.querySelector('.comments__empty');
         emptyEl?.remove();

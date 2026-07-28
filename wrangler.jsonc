@@ -15,6 +15,12 @@
 			"database_id": "79bdaea5-96e3-4361-bc2d-ec1097c20a62"
 		}
 	],
+	"r2_buckets": [
+		{
+			"binding": "UPLOADS",
+			"bucket_name": "mylineal-uploads"
+		}
+	],
 	"observability": {
 		"enabled": true
 	}

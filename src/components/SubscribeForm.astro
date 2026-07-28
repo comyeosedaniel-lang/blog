@@ -63,7 +63,7 @@ const t = useTranslations(lang);
           }),
         });
         if (!res.ok) throw new Error('request failed');
-        const data = await res.json();
+        const data = (await res.json()) as { alreadySubscribed?: boolean };
 
         status.textContent = data.alreadySubscribed
           ? (section.dataset.alreadyText ?? '')

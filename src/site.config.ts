@@ -44,3 +44,6 @@ export const NEWSLETTER = {
 export const GEO = {
   apiUrl: 'https://mylineal-comments.comyeosedaniel.workers.dev/geo',
 } as const;
+
+// R2 bucket's public URL, for images uploaded from the /write editor.
+export const UPLOADS_PUBLIC_URL = 'https://pub-f306afc3320d4b0fa973d58344df9d4a.r2.dev';

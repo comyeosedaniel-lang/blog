@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import WriteEditor from '../../../components/WriteEditor.astro';
+import { SITE } from '../../../site.config';
+import { getPostById } from '../../../lib/posts';
+
+export const prerender = false;
+
+const id = Number(Astro.params.id);
+const post = Number.isInteger(id) ? await getPostById(id) : null;
+
+if (!post) {
+  return Astro.rewrite('/404');
+}
+---
+
+<BaseLayout title={`편집: ${post.title}`} description={SITE.description.ko} lang="ko">
+  <h1 class="page-title">글 편집</h1>
+  <WriteEditor post={post} />
+</BaseLayout>
