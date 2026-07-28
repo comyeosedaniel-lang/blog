@@ -218,6 +218,20 @@ th, td {
   color: var(--accent);
 }
 
+.site-nav a.site-nav__write-btn,
+.site-nav a.site-nav__write-btn:hover {
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius);
+  color: var(--accent-contrast);
+  background: var(--accent);
+  font-weight: 600;
+  transition: opacity 0.15s ease;
+}
+
+.site-nav a.site-nav__write-btn:hover {
+  opacity: 0.9;
+}
+
 .icon-btn {
   display: inline-flex;
   align-items: center;
