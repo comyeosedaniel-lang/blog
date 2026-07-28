@@ -1,13 +1,16 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig, passthroughImageService } from 'astro/config';
 
 import mdx from '@astrojs/mdx';
-import sitemap from '@astrojs/sitemap';
+
+import cloudflare from '@astrojs/cloudflare';
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://blog.mylineal.com',
-  integrations: [mdx(), sitemap()],
+  output: 'server',
+  integrations: [mdx()],
+
   markdown: {
     shikiConfig: {
       themes: {
@@ -16,4 +19,13 @@ export default defineConfig({
       },
     },
   },
+
+  // Sharp (Astro's default image service) needs native Node addons that
+  // don't run in the Workers runtime — images are pre-optimized at upload
+  // time instead (see src/lib/images.ts), so no on-request processing here.
+  image: {
+    service: passthroughImageService(),
+  },
+
+  adapter: cloudflare(),
 });

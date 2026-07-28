@@ -3,7 +3,10 @@ import type { Lang } from '../i18n/ui';
 // Korean is estimated by character count (no reliable word boundaries),
 // English by word count — rough reading-speed averages for each.
 export function estimateReadingTime(raw: string, lang: Lang): number {
-  const text = raw.replace(/```[\s\S]*?```/g, '').trim();
+  const text = raw
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/```[\s\S]*?```/g, '')
+    .trim();
 
   if (lang === 'ko') {
     const chars = text.replace(/\s+/g, '').length;

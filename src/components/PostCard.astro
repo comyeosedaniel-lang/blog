@@ -2,10 +2,10 @@
 import { useTranslations, type Lang } from '../i18n/ui';
 import { estimateReadingTime } from '../lib/readingTime';
 import CategoryBadge from './CategoryBadge.astro';
-import type { CollectionEntry } from 'astro:content';
+import type { PostEntry } from '../lib/posts';
 
 interface Props {
-  entry: CollectionEntry<'blog'>;
+  entry: PostEntry;
   lang: Lang;
 }
 

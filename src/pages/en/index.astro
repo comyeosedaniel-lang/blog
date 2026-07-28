@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { listPosts } from '../../lib/posts';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostCard from '../../components/PostCard.astro';
 import Hero from '../../components/Hero.astro';
@@ -8,9 +8,7 @@ import { useTranslations } from '../../i18n/ui';
 
 const t = useTranslations('en');
 
-const posts = (await getCollection('blog', ({ id, data }) => {
-  return id.startsWith('en/') && (import.meta.env.DEV || !data.draft);
-})).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const posts = await listPosts({ lang: 'en' });
 
 const structuredData = {
   '@context': 'https://schema.org',

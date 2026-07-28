@@ -5,10 +5,10 @@ import { estimateReadingTime } from '../lib/readingTime';
 import CategoryBadge from '../components/CategoryBadge.astro';
 import Comments from '../components/Comments.astro';
 import { SITE } from '../site.config';
-import type { CollectionEntry } from 'astro:content';
+import type { PostEntry } from '../lib/posts';
 
 interface Props {
-  entry: CollectionEntry<'blog'>;
+  entry: PostEntry;
   lang: Lang;
 }
 

@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { listPosts } from '../lib/posts';
 import { CATEGORIES, type CategoryId } from '../site.config';
 import { useTranslations, type Lang } from '../i18n/ui';
 
@@ -10,19 +10,14 @@ interface Props {
 
 const { lang, activeCategory } = Astro.props;
 const t = useTranslations(lang);
-const prefix = lang === 'en' ? 'en/' : 'ko/';
 const basePath = lang === 'en' ? '/en' : '';
 
-const posts = await getCollection('blog', ({ id, data }) => {
-  return id.startsWith(prefix) && (import.meta.env.DEV || !data.draft);
-});
+const posts = await listPosts({ lang });
 
 const grouped = CATEGORIES.map((cat) => ({
   id: cat.id,
   label: lang === 'en' ? cat.en : cat.ko,
-  posts: posts
-    .filter((p) => p.data.category === cat.id)
-    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
+  posts: posts.filter((p) => p.data.category === cat.id),
 }));
 ---
 

@@ -7,14 +7,13 @@ import '@fontsource/noto-serif-kr/400.css';
 import '@fontsource/noto-serif-kr/700.css';
 import '../styles/global.css';
 
-import { getImage } from 'astro:assets';
 import { SITE, SEO_VERIFICATION, type CategoryId } from '../site.config';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import CategoryTree from '../components/CategoryTree.astro';
-import defaultOgSource from '../assets/hero.jpeg';
 import type { Lang } from '../i18n/ui';
-import type { ImageMetadata } from 'astro';
+
+const DEFAULT_OG_IMAGE = '/images/og-default.jpg';
 
 interface Props {
   title: string;
@@ -23,7 +22,7 @@ interface Props {
   active?: 'home' | 'about';
   sidebar?: boolean;
   activeCategory?: CategoryId;
-  image?: ImageMetadata;
+  image?: string;
   type?: 'website' | 'article';
   publishedTime?: Date;
   modifiedTime?: Date;
@@ -48,8 +47,7 @@ const {
 
 const pageTitle = title === SITE.title ? title : `${title} · ${SITE.title}`;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const ogImage = await getImage({ src: image ?? defaultOgSource, width: 1200, height: 630, format: 'jpg' });
-const ogImageURL = new URL(ogImage.src, Astro.site);
+const ogImageURL = new URL(image ?? DEFAULT_OG_IMAGE, Astro.site);
 const ogLocale = lang === 'en' ? 'en_US' : 'ko_KR';
 const alternateLang = lang === 'en' ? 'ko' : 'en';
 ---
@@ -60,7 +58,7 @@ const alternateLang = lang === 'en' ? 'ko' : 'en';
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="sitemap" href="/sitemap.xml" />
     <link
       rel="alternate"
       type="application/rss+xml"

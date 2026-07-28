@@ -1,7 +1,4 @@
 ---
-import { Image } from 'astro:assets';
-import heroImage from '../assets/hero.jpeg';
-
 interface Props {
   title: string;
 }
@@ -10,16 +7,7 @@ const { title } = Astro.props;
 ---
 
 <div class="hero">
-  <Image
-    src={heroImage}
-    alt=""
-    class="hero__image"
-    widths={[640, 960, 1400, 2000, 2752]}
-    sizes="100vw"
-    quality={80}
-    loading="eager"
-    fetchpriority="high"
-  />
+  <img src="/images/hero.jpg" alt="" class="hero__image" loading="eager" fetchpriority="high" />
   <div class="hero__overlay"></div>
   <div class="hero__content">
     <h1 class="hero__title">{title}</h1>

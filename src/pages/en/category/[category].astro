@@ -1,21 +1,19 @@
 ---
-import { getCollection } from 'astro:content';
+import { listPosts } from '../../../lib/posts';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PostCard from '../../../components/PostCard.astro';
 import { SITE, CATEGORIES } from '../../../site.config';
 import { useTranslations } from '../../../i18n/ui';
 
-export async function getStaticPaths() {
-  return CATEGORIES.map((category) => ({ params: { category: category.id } }));
+const { category } = Astro.params;
+const meta = CATEGORIES.find((c) => c.id === category);
+
+if (!meta) {
+  return Astro.rewrite('/404');
 }
 
-const { category } = Astro.params;
-const meta = CATEGORIES.find((c) => c.id === category)!;
 const t = useTranslations('en');
-
-const posts = (await getCollection('blog', ({ id, data }) => {
-  return id.startsWith('en/') && data.category === category && (import.meta.env.DEV || !data.draft);
-})).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const posts = await listPosts({ lang: 'en', category: meta.id });
 ---
 
 <BaseLayout title={meta.en} description={SITE.description.en} lang="en" sidebar activeCategory={meta.id}>
