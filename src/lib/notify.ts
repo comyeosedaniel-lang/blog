@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:workers';
-import { SITE } from '../site.config';
+import { SITE, NEWSLETTER } from '../site.config';
 
-const BROADCAST_URL = 'https://mylineal-newsletter.comyeosedaniel.workers.dev/broadcast';
+const BROADCAST_URL = `${NEWSLETTER.apiUrl}/broadcast`;
 
 interface NotifyInput {
   lang: 'ko' | 'en';

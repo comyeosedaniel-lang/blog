@@ -5,9 +5,11 @@ import mdx from '@astrojs/mdx';
 
 import cloudflare from '@astrojs/cloudflare';
 
+import { SITE } from './src/site.config.ts';
+
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://blog.mylineal.com',
+  site: SITE.url,
   output: 'server',
   integrations: [mdx()],
 
