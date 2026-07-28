@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdminNav from '../../components/AdminNav.astro';
 import { SITE } from '../../site.config';
 import { listAllPostsForAdmin } from '../../lib/posts';
 import { listCategories } from '../../lib/categories';
@@ -11,17 +12,10 @@ const categoryLabel = (id: string, lang: 'ko' | 'en') => categories.find((c) => 
 ---
 
 <BaseLayout title="글쓰기" description={SITE.description.ko} lang="ko">
+  <AdminNav active="dashboard" />
   <div class="write-dashboard">
     <div class="write-dashboard__head">
       <h1 class="page-title">글 관리</h1>
-      <div class="write-dashboard__actions">
-        <a class="write-btn write-btn--primary" href="/write/new">새 글쓰기</a>
-        <a class="write-btn" href="/write/categories">카테고리 관리</a>
-        <a class="write-btn" href="/write/settings">비밀번호 변경</a>
-        <form method="POST" action="/api/logout">
-          <button type="submit" class="write-btn">로그아웃</button>
-        </form>
-      </div>
     </div>
 
     {posts.length === 0 ? (

@@ -1,11 +1,13 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdminNav from '../../components/AdminNav.astro';
 import { SITE } from '../../site.config';
 
 export const prerender = false;
 ---
 
 <BaseLayout title="설정" description={SITE.description.ko} lang="ko">
+  <AdminNav active="settings" />
   <div class="settings">
     <h1 class="page-title">비밀번호 변경</h1>
     <form id="change-password-form" class="settings__form">
@@ -23,7 +25,6 @@ export const prerender = false;
       </label>
       <div class="settings__actions">
         <button type="submit" class="write-btn write-btn--primary">비밀번호 변경</button>
-        <a class="write-btn" href="/write">돌아가기</a>
       </div>
       <p id="settings-status" class="settings__status" role="status"></p>
     </form>

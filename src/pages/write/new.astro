@@ -1,12 +1,14 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import WriteEditor from '../../components/WriteEditor.astro';
+import AdminNav from '../../components/AdminNav.astro';
 import { SITE } from '../../site.config';
 
 export const prerender = false;
 ---
 
 <BaseLayout title="새 글쓰기" description={SITE.description.ko} lang="ko">
+  <AdminNav active="new" />
   <h1 class="page-title">새 글쓰기</h1>
   <WriteEditor />
 </BaseLayout>

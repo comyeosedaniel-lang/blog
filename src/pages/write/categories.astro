@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdminNav from '../../components/AdminNav.astro';
 import { SITE } from '../../site.config';
 import { listCategories, countPostsInCategory } from '../../lib/categories';
 
@@ -11,10 +12,10 @@ const rows = categories.map((c, i) => ({ ...c, postCount: counts[i] }));
 ---
 
 <BaseLayout title="카테고리 관리" description={SITE.description.ko} lang="ko">
+  <AdminNav active="categories" />
   <div class="categories-admin">
     <div class="categories-admin__head">
       <h1 class="page-title">카테고리 관리</h1>
-      <a class="write-btn" href="/write">돌아가기</a>
     </div>
 
     <ul class="categories-admin__list" id="categories-list">

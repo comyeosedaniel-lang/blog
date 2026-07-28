@@ -1,0 +1,58 @@
+---
+interface Props {
+  active?: 'dashboard' | 'new' | 'categories' | 'settings';
+}
+
+const { active } = Astro.props;
+---
+
+<nav class="admin-nav" aria-label="관리자 메뉴">
+  <a href="/write" aria-current={active === 'dashboard' ? 'page' : undefined}>글 목록</a>
+  <a href="/write/new" aria-current={active === 'new' ? 'page' : undefined}>새 글쓰기</a>
+  <a href="/write/categories" aria-current={active === 'categories' ? 'page' : undefined}>카테고리 관리</a>
+  <a href="/write/settings" aria-current={active === 'settings' ? 'page' : undefined}>비밀번호 변경</a>
+  <form method="POST" action="/api/logout" class="admin-nav__logout">
+    <button type="submit">로그아웃</button>
+  </form>
+</nav>
+
+<style>
+  .admin-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.75rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
+  }
+
+  .admin-nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+
+  .admin-nav a:hover,
+  .admin-nav a[aria-current='page'] {
+    color: var(--accent);
+  }
+
+  .admin-nav__logout {
+    margin-left: auto;
+  }
+
+  .admin-nav__logout button {
+    font: inherit;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .admin-nav__logout button:hover {
+    color: var(--accent);
+  }
+</style>
