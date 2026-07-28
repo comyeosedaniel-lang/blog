@@ -1,5 +1,5 @@
 ---
-import { CATEGORIES } from '../site.config';
+import { listCategories } from '../lib/categories';
 import type { AdminPostFull } from '../lib/posts';
 
 interface Props {
@@ -8,6 +8,7 @@ interface Props {
 
 const { post = null } = Astro.props;
 const isEdit = post !== null;
+const categories = await listCategories();
 ---
 
 <div
@@ -44,8 +45,8 @@ const isEdit = post !== null;
     <label class="write-field">
       <span>카테고리</span>
       <select id="category">
-        {CATEGORIES.map((c) => (
-          <option value={c.id} selected={(post?.category ?? 'life') === c.id}>{c.ko}</option>
+        {categories.map((c) => (
+          <option value={c.id} selected={(post?.category ?? categories[0]?.id) === c.id}>{c.ko}</option>
         ))}
       </select>
     </label>

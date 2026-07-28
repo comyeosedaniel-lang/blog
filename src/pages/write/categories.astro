@@ -1,0 +1,238 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE } from '../../site.config';
+import { listCategories, countPostsInCategory } from '../../lib/categories';
+
+export const prerender = false;
+
+const categories = await listCategories();
+const counts = await Promise.all(categories.map((c) => countPostsInCategory(c.id)));
+const rows = categories.map((c, i) => ({ ...c, postCount: counts[i] }));
+---
+
+<BaseLayout title="카테고리 관리" description={SITE.description.ko} lang="ko">
+  <div class="categories-admin">
+    <div class="categories-admin__head">
+      <h1 class="page-title">카테고리 관리</h1>
+      <a class="write-btn" href="/write">돌아가기</a>
+    </div>
+
+    <ul class="categories-admin__list" id="categories-list">
+      {rows.map((c) => (
+        <li class="categories-admin__row" data-id={c.id}>
+          <span class="categories-admin__id">{c.id}</span>
+          <input type="text" class="categories-admin__input" data-field="ko" value={c.ko} />
+          <input type="text" class="categories-admin__input" data-field="en" value={c.en} />
+          <span class="categories-admin__count">글 {c.postCount}개</span>
+          <button type="button" class="write-btn categories-admin__save">저장</button>
+          <button type="button" class="write-btn write-btn--danger categories-admin__delete">삭제</button>
+        </li>
+      ))}
+    </ul>
+
+    <form id="new-category-form" class="categories-admin__new">
+      <h2>새 카테고리</h2>
+      <div class="categories-admin__new-row">
+        <label>
+          <span>주소(id, 영문 소문자/숫자/하이픈)</span>
+          <input type="text" id="new-id" required pattern="[a-z0-9-]+" placeholder="essay" />
+        </label>
+        <label>
+          <span>한국어 이름</span>
+          <input type="text" id="new-ko" required placeholder="에세이" />
+        </label>
+        <label>
+          <span>영어 이름</span>
+          <input type="text" id="new-en" required placeholder="Essays" />
+        </label>
+        <button type="submit" class="write-btn write-btn--primary">추가</button>
+      </div>
+    </form>
+
+    <p id="categories-status" class="categories-admin__status" role="status"></p>
+  </div>
+</BaseLayout>
+
+<script>
+  const list = document.getElementById('categories-list') as HTMLUListElement;
+  const status = document.getElementById('categories-status') as HTMLParagraphElement;
+  const newForm = document.getElementById('new-category-form') as HTMLFormElement;
+
+  list.addEventListener('click', async (e) => {
+    const target = e.target as HTMLElement;
+    const row = target.closest<HTMLLIElement>('.categories-admin__row');
+    if (!row) return;
+    const id = row.dataset.id!;
+
+    if (target.classList.contains('categories-admin__save')) {
+      const ko = row.querySelector<HTMLInputElement>('[data-field="ko"]')!.value.trim();
+      const en = row.querySelector<HTMLInputElement>('[data-field="en"]')!.value.trim();
+      status.textContent = '저장하는 중...';
+      const res = await fetch(`/api/categories/${id}`, {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ ko, en }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      status.textContent = res.ok ? '저장했어요.' : (data.error ?? '저장에 실패했어요.');
+    }
+
+    if (target.classList.contains('categories-admin__delete')) {
+      if (!window.confirm(`"${id}" 카테고리를 삭제할까요?`)) return;
+      const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (res.ok) {
+        row.remove();
+        status.textContent = '삭제했어요.';
+      } else {
+        status.textContent = data.error ?? '삭제에 실패했어요.';
+      }
+    }
+  });
+
+  newForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = (document.getElementById('new-id') as HTMLInputElement).value.trim();
+    const ko = (document.getElementById('new-ko') as HTMLInputElement).value.trim();
+    const en = (document.getElementById('new-en') as HTMLInputElement).value.trim();
+
+    status.textContent = '추가하는 중...';
+    const res = await fetch('/api/categories', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id, ko, en }),
+    });
+    const data = (await res.json().catch(() => ({}))) as { error?: string };
+    if (res.ok) {
+      window.location.reload();
+    } else {
+      status.textContent = data.error ?? '추가에 실패했어요.';
+    }
+  });
+</script>
+
+<style>
+  .categories-admin__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .categories-admin__head .page-title {
+    margin: 0;
+  }
+
+  .categories-admin__list {
+    list-style: none;
+    margin: 0 0 2rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .categories-admin__row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .categories-admin__id {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    min-width: 5rem;
+  }
+
+  .categories-admin__input {
+    font: inherit;
+    font-size: 0.9375rem;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.4rem 0.6rem;
+    flex: 1 1 8rem;
+    min-width: 0;
+  }
+
+  .categories-admin__count {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .categories-admin__new {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .categories-admin__new h2 {
+    font-size: 1rem;
+    margin: 0 0 0.75rem;
+  }
+
+  .categories-admin__new-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .categories-admin__new-row label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+
+  .categories-admin__new-row input {
+    font: inherit;
+    font-size: 0.9375rem;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.7rem;
+  }
+
+  .write-btn {
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-block;
+  }
+
+  .write-btn--primary {
+    color: var(--accent-contrast);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .write-btn--danger {
+    color: #c0392b;
+  }
+
+  .write-btn:hover {
+    opacity: 0.9;
+  }
+
+  .categories-admin__status {
+    min-height: 1.2em;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+</style>

@@ -119,7 +119,6 @@ Fill in:
 - `SITE.title`, `SITE.description`, `SITE.url` (your future domain, or the
   `workers.dev` URL you'll get in step 6 if skipping a custom domain),
   `SITE.author`, `SITE.github`
-- `CATEGORIES` — your own category list (id/ko/en), or keep the defaults
 - `COMMENTS.apiUrl` — comments-worker's URL from step 1
 - `COMMENTS.turnstileSiteKey` — the Turnstile site key from step 1
 - `NEWSLETTER.apiUrl` — newsletter-worker's URL from step 2
@@ -150,6 +149,10 @@ The second command prints a public `https://pub-xxxx.r2.dev` URL — paste it
 into `site.config.ts`'s `UPLOADS_PUBLIC_URL`. Also update
 `wrangler.jsonc`'s `r2_buckets[0].bucket_name` to match the bucket name you
 created.
+
+`schema.sql` seeds four starter categories (dev/book/life/us). Once you're
+logged in, manage categories (rename, add, delete) from `/write/categories`
+— no code changes or redeploys needed.
 
 ## 5. Set the admin password
 

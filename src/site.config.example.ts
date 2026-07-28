@@ -12,14 +12,9 @@ export const SITE = {
   github: 'https://github.com/your-username',
 } as const;
 
-export const CATEGORIES = [
-  { id: 'dev', ko: '개발 이야기', en: 'Dev Stories' },
-  { id: 'book', ko: '책 이야기', en: 'Book Stories' },
-  { id: 'life', ko: '나의 이야기', en: 'My Story' },
-  { id: 'us', ko: '우리의 이야기', en: 'Our Story' },
-] as const;
-
-export type CategoryId = (typeof CATEGORIES)[number]['id'];
+// Categories are managed from /write/categories (stored in D1), not here —
+// see src/lib/categories.ts. schema.sql seeds four defaults on first setup;
+// rename/delete them from the admin UI after deploying.
 
 // Paste the verification codes Google Search Console / Naver Search Advisor
 // give you when you add this site as a property. Leave blank to omit the tag.

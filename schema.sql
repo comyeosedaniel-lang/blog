@@ -24,3 +24,16 @@ CREATE TABLE IF NOT EXISTS admin (
   id INTEGER PRIMARY KEY CHECK (id = 1),
   password_hash TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS categories (
+  id TEXT PRIMARY KEY,
+  ko TEXT NOT NULL,
+  en TEXT NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0
+);
+
+INSERT OR IGNORE INTO categories (id, ko, en, sort_order) VALUES
+  ('dev', '개발 이야기', 'Dev Stories', 0),
+  ('book', '책 이야기', 'Book Stories', 1),
+  ('life', '나의 이야기', 'My Story', 2),
+  ('us', '우리의 이야기', 'Our Story', 3);

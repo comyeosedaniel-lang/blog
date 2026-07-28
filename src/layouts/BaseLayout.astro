@@ -7,7 +7,7 @@ import '@fontsource/noto-serif-kr/400.css';
 import '@fontsource/noto-serif-kr/700.css';
 import '../styles/global.css';
 
-import { SITE, SEO_VERIFICATION, type CategoryId } from '../site.config';
+import { SITE, SEO_VERIFICATION } from '../site.config';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import CategoryTree from '../components/CategoryTree.astro';
@@ -21,7 +21,7 @@ interface Props {
   lang: Lang;
   active?: 'home' | 'about';
   sidebar?: boolean;
-  activeCategory?: CategoryId;
+  activeCategory?: string;
   image?: string;
   type?: 'website' | 'article';
   publishedTime?: Date;

@@ -1,5 +1,4 @@
 import { env } from 'cloudflare:workers';
-import type { CategoryId } from '../site.config';
 import type { Lang } from '../i18n/ui';
 
 export interface PostEntry {
@@ -8,7 +7,7 @@ export interface PostEntry {
   data: {
     title: string;
     description: string;
-    category: CategoryId;
+    category: string;
     tags: string[];
     draft: boolean;
     pubDate: Date;
@@ -41,7 +40,7 @@ function toEntry(row: PostRow): PostEntry {
     data: {
       title: row.title,
       description: row.description,
-      category: row.category as CategoryId,
+      category: row.category,
       tags: JSON.parse(row.tags || '[]'),
       draft: row.draft === 1,
       pubDate: new Date(row.pub_date),
@@ -54,7 +53,7 @@ function toEntry(row: PostRow): PostEntry {
 
 interface ListOptions {
   lang: Lang;
-  category?: CategoryId;
+  category?: string;
   includeDrafts?: boolean;
   limit?: number;
 }
@@ -104,7 +103,7 @@ export interface AdminPostSummary {
   slug: string;
   lang: Lang;
   title: string;
-  category: CategoryId;
+  category: string;
   draft: boolean;
   pubDate: Date;
 }
@@ -124,7 +123,7 @@ function toAdminSummary(row: PostRow): AdminPostSummary {
     slug: row.slug,
     lang: row.lang as Lang,
     title: row.title,
-    category: row.category as CategoryId,
+    category: row.category,
     draft: row.draft === 1,
     pubDate: new Date(row.pub_date),
   };
@@ -166,7 +165,7 @@ export interface PostInput {
   lang: Lang;
   title: string;
   description: string;
-  category: CategoryId;
+  category: string;
   tags: string[];
   contentHtml: string;
   contentJson: string;

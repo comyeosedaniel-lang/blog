@@ -1,20 +1,25 @@
 import { listPosts } from '../lib/posts';
-import { CATEGORIES, SITE } from '../site.config';
+import { listCategories } from '../lib/categories';
+import { SITE } from '../site.config';
 
 function urlEntry(loc, lastmod) {
   return `<url><loc>${loc}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ''}</url>`;
 }
 
 export async function GET() {
-  const [koPosts, enPosts] = await Promise.all([listPosts({ lang: 'ko' }), listPosts({ lang: 'en' })]);
+  const [koPosts, enPosts, categories] = await Promise.all([
+    listPosts({ lang: 'ko' }),
+    listPosts({ lang: 'en' }),
+    listCategories(),
+  ]);
 
   const staticPaths = [
     '/',
     '/en/',
     '/about/',
     '/en/about/',
-    ...CATEGORIES.map((c) => `/category/${c.id}/`),
-    ...CATEGORIES.map((c) => `/en/category/${c.id}/`),
+    ...categories.map((c) => `/category/${c.id}/`),
+    ...categories.map((c) => `/en/category/${c.id}/`),
   ];
 
   const urls = [

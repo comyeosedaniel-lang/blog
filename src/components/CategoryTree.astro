@@ -1,20 +1,20 @@
 ---
 import { listPosts } from '../lib/posts';
-import { CATEGORIES, type CategoryId } from '../site.config';
+import { listCategories } from '../lib/categories';
 import { useTranslations, type Lang } from '../i18n/ui';
 
 interface Props {
   lang: Lang;
-  activeCategory?: CategoryId;
+  activeCategory?: string;
 }
 
 const { lang, activeCategory } = Astro.props;
 const t = useTranslations(lang);
 const basePath = lang === 'en' ? '/en' : '';
 
-const posts = await listPosts({ lang });
+const [posts, categories] = await Promise.all([listPosts({ lang }), listCategories()]);
 
-const grouped = CATEGORIES.map((cat) => ({
+const grouped = categories.map((cat) => ({
   id: cat.id,
   label: lang === 'en' ? cat.en : cat.ko,
   posts: posts.filter((p) => p.data.category === cat.id),

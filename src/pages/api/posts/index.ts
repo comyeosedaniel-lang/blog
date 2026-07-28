@@ -1,5 +1,5 @@
 import { createPost, slugExists, type PostInput } from '../../../lib/posts';
-import { CATEGORIES } from '../../../site.config';
+import { categoryIdExists } from '../../../lib/categories';
 import { notifySubscribers } from '../../../lib/notify';
 import type { APIRoute } from 'astro';
 
@@ -13,7 +13,8 @@ function validate(body: any): body is PostInput {
     typeof body.title === 'string' &&
     body.title.trim().length > 0 &&
     typeof body.description === 'string' &&
-    CATEGORIES.some((c) => c.id === body.category) &&
+    typeof body.category === 'string' &&
+    body.category.length > 0 &&
     Array.isArray(body.tags) &&
     typeof body.contentHtml === 'string' &&
     typeof body.contentJson === 'string'
@@ -25,6 +26,10 @@ export const POST: APIRoute = async ({ request }) => {
 
   if (!validate(body)) {
     return new Response(JSON.stringify({ error: 'invalid post data' }), { status: 400 });
+  }
+
+  if (!(await categoryIdExists(body.category))) {
+    return new Response(JSON.stringify({ error: 'unknown category' }), { status: 400 });
   }
 
   if (await slugExists(body.lang, body.slug)) {

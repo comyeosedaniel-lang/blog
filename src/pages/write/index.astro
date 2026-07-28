@@ -1,11 +1,13 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { SITE, CATEGORIES } from '../../site.config';
+import { SITE } from '../../site.config';
 import { listAllPostsForAdmin } from '../../lib/posts';
+import { listCategories } from '../../lib/categories';
 
 export const prerender = false;
 
-const posts = await listAllPostsForAdmin();
+const [posts, categories] = await Promise.all([listAllPostsForAdmin(), listCategories()]);
+const categoryLabel = (id: string, lang: 'ko' | 'en') => categories.find((c) => c.id === id)?.[lang] ?? id;
 ---
 
 <BaseLayout title="글쓰기" description={SITE.description.ko} lang="ko">
@@ -14,6 +16,7 @@ const posts = await listAllPostsForAdmin();
       <h1 class="page-title">글 관리</h1>
       <div class="write-dashboard__actions">
         <a class="write-btn write-btn--primary" href="/write/new">새 글쓰기</a>
+        <a class="write-btn" href="/write/categories">카테고리 관리</a>
         <a class="write-btn" href="/write/settings">비밀번호 변경</a>
         <form method="POST" action="/api/logout">
           <button type="submit" class="write-btn">로그아웃</button>
@@ -29,7 +32,7 @@ const posts = await listAllPostsForAdmin();
           <li class="write-list__item">
             <div class="write-list__meta">
               <span class="write-list__lang">{p.lang === 'ko' ? '한국어' : 'English'}</span>
-              <span class="write-list__category">{CATEGORIES.find((c) => c.id === p.category)?.[p.lang]}</span>
+              <span class="write-list__category">{categoryLabel(p.category, p.lang)}</span>
               {p.draft && <span class="write-list__draft">임시저장</span>}
             </div>
             <a class="write-list__title" href={`/write/edit/${p.id}`}>{p.title}</a>

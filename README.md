@@ -42,9 +42,13 @@ There's no other way to create a post — no markdown files, no separate CMS.
 
 ## Configuration
 
-`src/site.config.ts` is the single place to edit site title/description,
-categories, and the URLs/keys for the comments and newsletter workers. See
+`src/site.config.ts` is the single place to edit site title/description and
+the URLs/keys for the comments and newsletter workers. See
 `src/site.config.example.ts` for a blank starting point.
+
+Categories aren't in this file — they live in D1 and are managed from
+`/write/categories` (add, rename, delete; a category with posts in it can't
+be deleted until they're reassigned or removed).
 
 Colors, typography, and other design tokens live as CSS variables in
 `src/styles/global.css`.
@@ -54,16 +58,18 @@ Colors, typography, and other design tokens live as CSS variables in
 ```
 /
 ├── src/
-│   ├── site.config.ts         # site title, categories, worker URLs/keys
+│   ├── site.config.ts         # site title, worker URLs/keys
 │   ├── site.config.example.ts # template starting point for the above
 │   ├── lib/
 │   │   ├── posts.ts           # D1 query layer (list/get/create/update/delete)
+│   │   ├── categories.ts      # D1 query layer for categories
+│   │   ├── admin.ts           # D1-backed admin password hash get/set
 │   │   ├── auth.ts            # password hashing (PBKDF2 via Web Crypto)
 │   │   └── notify.ts          # publish-time newsletter broadcast call
-│   ├── middleware.ts          # gates /write and /api/posts, /api/upload
+│   ├── middleware.ts          # gates /write and /api/posts, /api/upload, /api/categories
 │   ├── pages/
-│   │   ├── write/             # /write dashboard, editor, login
-│   │   ├── api/                # posts CRUD, image upload, login/logout
+│   │   ├── write/             # /write dashboard, editor, login, categories, settings
+│   │   ├── api/                # posts/categories CRUD, image upload, login/logout
 │   │   ├── blog/[...slug].astro, en/blog/[...slug].astro
 │   │   ├── category/[category].astro, en/category/[category].astro
 │   │   ├── rss.xml.js, en/rss.xml.js, sitemap.xml.js

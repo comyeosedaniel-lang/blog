@@ -1,12 +1,13 @@
 ---
 import { listPosts } from '../../../lib/posts';
+import { getCategory } from '../../../lib/categories';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PostCard from '../../../components/PostCard.astro';
-import { SITE, CATEGORIES } from '../../../site.config';
+import { SITE } from '../../../site.config';
 import { useTranslations } from '../../../i18n/ui';
 
 const { category } = Astro.params;
-const meta = CATEGORIES.find((c) => c.id === category);
+const meta = category ? await getCategory(category) : null;
 
 if (!meta) {
   return Astro.rewrite('/404');
