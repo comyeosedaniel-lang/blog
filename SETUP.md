@@ -153,18 +153,22 @@ created.
 
 ## 5. Set the admin password
 
-There's a single site-wide password gating `/write` (no user accounts).
+There's a single site-wide password gating `/write` (no user accounts). It's
+stored in the `admin` table in your D1 database (see `schema.sql`), not as a
+Worker secret — this is what lets you change it later from `/write/settings`
+instead of re-running a CLI command every time.
 
 ```sh
 node scripts/hash-password.mjs "choose-a-strong-password"
 ```
 
-This prints a `salt:hash` string.
+This prints a `salt:hash` string. Insert it as the initial password:
 
 ```sh
-npx wrangler secret put ADMIN_PASSWORD_HASH
-# paste the salt:hash string when prompted
+npx wrangler d1 execute my-blog-content --remote --command "INSERT INTO admin (id, password_hash) VALUES (1, '<salt:hash from above>');"
+```
 
+```sh
 npx wrangler secret put NEWSLETTER_ADMIN_KEY
 # paste the same ADMIN_KEY value you set on newsletter-worker in step 2
 ```
@@ -172,9 +176,14 @@ npx wrangler secret put NEWSLETTER_ADMIN_KEY
 For local development, also create a `.dev.vars` file (gitignored) with:
 
 ```
-ADMIN_PASSWORD_HASH=<salt:hash from above>
 NEWSLETTER_ADMIN_KEY=<same key as newsletter-worker's ADMIN_KEY>
 ```
+
+and run the same `INSERT INTO admin ...` command without `--remote` against
+your local D1 (or just log in once against the remote DB while developing).
+
+Once logged in, you can change the password anytime from `/write/settings`
+without touching the CLI.
 
 ## 6. Build and deploy
 
@@ -220,6 +229,8 @@ trigger a broadcast email to confirmed newsletter subscribers automatically.
   account and can't be templated with environment variables.
 - Nothing in `site.config.ts` is a secret (Turnstile *site* keys, worker
   URLs, and R2 public URLs are all meant to be public) — the actual secrets
-  (`ADMIN_PASSWORD_HASH`, `TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`,
-  `ADMIN_KEY`/`NEWSLETTER_ADMIN_KEY`) only ever live as Worker secrets or in
-  your gitignored `.dev.vars`.
+  (`TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `ADMIN_KEY`/
+  `NEWSLETTER_ADMIN_KEY`) only ever live as Worker secrets or in your
+  gitignored `.dev.vars`. The admin password hash is the one exception —
+  it's intentionally in D1, not a Worker secret, so `/write/settings` can
+  change it at runtime.
