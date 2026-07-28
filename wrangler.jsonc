@@ -21,6 +21,13 @@
 			"bucket_name": "mylineal-uploads"
 		}
 	],
+	"routes": [
+		{
+			"pattern": "blog.mylineal.com",
+			"custom_domain": true
+		}
+	],
+	"workers_dev": true,
 	"observability": {
 		"enabled": true
 	}
