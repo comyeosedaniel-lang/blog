@@ -26,7 +26,11 @@ const authed = await Astro.session?.get('authed');
       <a href={home} aria-current={active === 'home' ? 'page' : undefined}>{t('nav.home')}</a>
       <a href={about} aria-current={active === 'about' ? 'page' : undefined}>{t('nav.about')}</a>
       <a href={langSwitch} id="lang-switch" data-lang={lang === 'en' ? 'ko' : 'en'}>{t('nav.lang')}</a>
-      {authed && <a href="/write" class="site-nav__write-btn">글쓰기</a>}
+      {authed ? (
+        <a href="/write" class="site-nav__write-btn">글쓰기</a>
+      ) : (
+        <a href="/write/login">로그인</a>
+      )}
       <ThemeToggle lang={lang} />
     </nav>
   </div>
