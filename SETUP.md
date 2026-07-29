@@ -1,7 +1,7 @@
 # Setup guide
 
 This repo is a self-hosted, database-backed blog: an Astro site running as a
-Cloudflare Worker, with a rich-text `/write` editor (no separate CMS admin
+Cloudflare Worker, with a rich-text `/admin` editor (no separate CMS admin
 app), self-hosted comments, and a bilingual double-opt-in email newsletter.
 Nothing runs on someone else's platform except Cloudflare (compute/storage)
 and Resend (outbound email) — no GitHub-hosted CMS, no third-party comment
@@ -15,7 +15,7 @@ own Cloudflare account, domain, and content instead.
 ## Architecture
 
 - **Main site** (`/`): Astro SSR (`output: 'server'`) on Cloudflare Workers,
-  content in D1, images in R2, sessions in KV, TipTap editor at `/write`.
+  content in D1, images in R2, sessions in KV, TipTap editor at `/admin`.
 - **comments-worker/**: standalone Cloudflare Worker + its own D1, guestbook-
   style comments with Turnstile spam protection. No login required to comment.
 - **newsletter-worker/**: standalone Cloudflare Worker + its own D1, double
@@ -151,14 +151,14 @@ into `site.config.ts`'s `UPLOADS_PUBLIC_URL`. Also update
 created.
 
 `schema.sql` seeds four starter categories (dev/book/life/us). Once you're
-logged in, manage categories (rename, add, delete) from `/write/categories`
+logged in, manage categories (rename, add, delete) from `/admin/categories`
 — no code changes or redeploys needed.
 
 ## 5. Set the admin password
 
-There's a single site-wide password gating `/write` (no user accounts). It's
+There's a single site-wide password gating `/admin` (no user accounts). It's
 stored in the `admin` table in your D1 database (see `schema.sql`), not as a
-Worker secret — this is what lets you change it later from `/write/settings`
+Worker secret — this is what lets you change it later from `/admin/settings`
 instead of re-running a CLI command every time.
 
 ```sh
@@ -185,7 +185,7 @@ NEWSLETTER_ADMIN_KEY=<same key as newsletter-worker's ADMIN_KEY>
 and run the same `INSERT INTO admin ...` command without `--remote` against
 your local D1 (or just log in once against the remote DB while developing).
 
-Once logged in, you can change the password anytime from `/write/settings`
+Once logged in, you can change the password anytime from `/admin/settings`
 without touching the CLI.
 
 ## 6. Build and deploy
@@ -218,7 +218,7 @@ SSL certificate for you.
 
 ## 7. Start writing
 
-Visit `/write/login`, enter the password from step 5, and you're in. Posts
+Visit `/admin/login`, enter the password from step 5, and you're in. Posts
 publish instantly (no rebuild/redeploy) and, if not saved as a draft,
 trigger a broadcast email to confirmed newsletter subscribers automatically.
 
@@ -235,5 +235,5 @@ trigger a broadcast email to confirmed newsletter subscribers automatically.
   (`TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `ADMIN_KEY`/
   `NEWSLETTER_ADMIN_KEY`) only ever live as Worker secrets or in your
   gitignored `.dev.vars`. The admin password hash is the one exception —
-  it's intentionally in D1, not a Worker secret, so `/write/settings` can
+  it's intentionally in D1, not a Worker secret, so `/admin/settings` can
   change it at runtime.
