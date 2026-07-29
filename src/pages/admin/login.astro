@@ -7,8 +7,8 @@ export const prerender = false;
 const error = Astro.url.searchParams.get('error');
 ---
 
-<BaseLayout title="글쓰기 로그인" description={SITE.description.ko} lang="ko">
-  <h1 class="page-title">글쓰기</h1>
+<BaseLayout title="관리자 로그인" description={SITE.description.ko} lang="ko">
+  <h1 class="page-title">관리자 로그인</h1>
   <form class="login-form" method="POST" action="/api/login">
     <label class="login-form__field">
       <span>비밀번호</span>

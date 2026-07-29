@@ -218,7 +218,7 @@ if (root) {
         statusEl.textContent = `저장 실패: ${err.error ?? res.status}`;
         return;
       }
-      window.location.href = '/write';
+      window.location.href = '/admin';
     } catch {
       statusEl.textContent = '저장 중 문제가 생겼어요.';
     }
@@ -232,7 +232,7 @@ if (root) {
     if (!window.confirm('정말 이 글을 삭제할까요?')) return;
     const res = await fetch(`/api/posts/${postId}`, { method: 'DELETE' });
     if (res.ok) {
-      window.location.href = '/write';
+      window.location.href = '/admin';
     } else {
       statusEl.textContent = '삭제에 실패했어요.';
     }

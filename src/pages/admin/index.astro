@@ -29,7 +29,7 @@ const categoryLabel = (id: string, lang: 'ko' | 'en') => categories.find((c) => 
               <span class="write-list__category">{categoryLabel(p.category, p.lang)}</span>
               {p.draft && <span class="write-list__draft">임시저장</span>}
             </div>
-            <a class="write-list__title" href={`/write/edit/${p.id}`}>{p.title}</a>
+            <a class="write-list__title" href={`/admin/edit/${p.id}`}>{p.title}</a>
           </li>
         ))}
       </ul>

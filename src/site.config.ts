@@ -10,7 +10,7 @@ export const SITE = {
   github: 'https://github.com/comyeosedaniel-lang',
 } as const;
 
-// Categories are managed from /write/categories (stored in D1), not here —
+// Categories are managed from /admin/categories (stored in D1), not here —
 // see src/lib/categories.ts.
 
 // Paste the verification codes Google Search Console / Naver Search Advisor
@@ -39,5 +39,5 @@ export const GEO = {
   apiUrl: 'https://mylineal-comments.comyeosedaniel.workers.dev/geo',
 } as const;
 
-// R2 bucket's public URL, for images uploaded from the /write editor.
+// R2 bucket's public URL, for images uploaded from the /admin editor.
 export const UPLOADS_PUBLIC_URL = 'https://pub-f306afc3320d4b0fa973d58344df9d4a.r2.dev';

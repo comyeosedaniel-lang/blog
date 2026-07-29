@@ -12,7 +12,7 @@ export const SITE = {
   github: 'https://github.com/your-username',
 } as const;
 
-// Categories are managed from /write/categories (stored in D1), not here —
+// Categories are managed from /admin/categories (stored in D1), not here —
 // see src/lib/categories.ts. schema.sql seeds four defaults on first setup;
 // rename/delete them from the admin UI after deploying.
 
@@ -46,6 +46,6 @@ export const GEO = {
   apiUrl: 'https://your-comments-worker.your-subdomain.workers.dev/geo',
 } as const;
 
-// R2 bucket's public URL, for images uploaded from the /write editor.
+// R2 bucket's public URL, for images uploaded from the /admin editor.
 // Printed by `wrangler r2 bucket dev-url enable <bucket-name>` (see SETUP.md).
 export const UPLOADS_PUBLIC_URL = 'https://your-bucket-public-url.r2.dev';

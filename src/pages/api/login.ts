@@ -12,11 +12,11 @@ export const POST: APIRoute = async ({ request, session, redirect }) => {
   const valid = storedHash ? await verifyPassword(password, storedHash) : false;
 
   if (!valid) {
-    return redirect('/write/login?error=1');
+    return redirect('/admin/login?error=1');
   }
 
   session?.set('authed', true);
   await session?.regenerate();
 
-  return redirect('/write');
+  return redirect('/admin');
 };

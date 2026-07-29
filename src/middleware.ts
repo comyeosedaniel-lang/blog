@@ -1,8 +1,8 @@
 import { defineMiddleware } from 'astro:middleware';
 
-const PROTECTED_PAGE_PREFIXES = ['/write'];
+const PROTECTED_PAGE_PREFIXES = ['/admin'];
 const PROTECTED_API_PREFIXES = ['/api/posts', '/api/upload', '/api/change-password', '/api/categories'];
-const PUBLIC_PATHS = new Set(['/write/login', '/api/login', '/api/logout']);
+const PUBLIC_PATHS = new Set(['/admin/login', '/api/login', '/api/logout']);
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
@@ -27,7 +27,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
         headers: { 'content-type': 'application/json' },
       });
     }
-    return context.redirect('/write/login');
+    return context.redirect('/admin/login');
   }
 
   return next();

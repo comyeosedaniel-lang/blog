@@ -4,5 +4,5 @@ export const prerender = false;
 
 export const POST: APIRoute = async ({ session, redirect }) => {
   session?.destroy();
-  return redirect('/write/login');
+  return redirect('/admin/login');
 };
