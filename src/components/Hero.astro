@@ -7,7 +7,13 @@ const { title } = Astro.props;
 ---
 
 <div class="hero">
-  <img src="/images/hero.jpg" alt="" class="hero__image" loading="eager" fetchpriority="high" />
+  <img
+    src="/images/hero.jpg"
+    alt="바다가 내려다보이는 절벽 위에서 수평선을 바라보는 사람의 흑백 사진"
+    class="hero__image"
+    loading="eager"
+    fetchpriority="high"
+  />
   <div class="hero__overlay"></div>
   <div class="hero__content">
     <h1 class="hero__title">{title}</h1>

@@ -3,6 +3,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
+import { SITE } from '../site.config';
 
 interface InitialPost {
   id: number;
@@ -43,6 +44,21 @@ if (root) {
       .replace(/^-+|-+$/g, '');
   }
 
+  function drawWatermark(ctx: CanvasRenderingContext2D, width: number, height: number) {
+    const text = `© ${SITE.author}`;
+    const fontSize = Math.max(14, Math.round(width * 0.025));
+    ctx.font = `${fontSize}px sans-serif`;
+    ctx.textBaseline = 'bottom';
+    ctx.textAlign = 'right';
+    const x = width - fontSize * 0.6;
+    const y = height - fontSize * 0.6;
+    ctx.lineWidth = Math.max(1, fontSize * 0.12);
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.55)';
+    ctx.strokeText(text, x, y);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.fillText(text, x, y);
+  }
+
   async function resizeImage(file: File, maxWidth = 1600, quality = 0.82): Promise<Blob> {
     const bitmap = await createImageBitmap(file);
     const scale = Math.min(1, maxWidth / bitmap.width);
@@ -51,6 +67,7 @@ if (root) {
     canvas.height = Math.max(1, Math.round(bitmap.height * scale));
     const ctx = canvas.getContext('2d')!;
     ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    drawWatermark(ctx, canvas.width, canvas.height);
     return await new Promise<Blob>((resolve, reject) => {
       canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('canvas.toBlob failed'))), 'image/jpeg', quality);
     });
@@ -118,10 +135,11 @@ if (root) {
   imageInput.addEventListener('change', async () => {
     const file = imageInput.files?.[0];
     if (!file) return;
+    const alt = window.prompt('이 이미지를 설명하는 대체 텍스트를 입력하세요 (검색엔진 노출에 도움돼요).', '') ?? '';
     statusEl.textContent = '이미지 업로드 중...';
     try {
       const url = await uploadImage(file);
-      editor.chain().focus().setImage({ src: url }).run();
+      editor.chain().focus().setImage({ src: url, alt }).run();
       statusEl.textContent = '';
     } catch {
       statusEl.textContent = '이미지 업로드에 실패했어요.';
@@ -138,10 +156,11 @@ if (root) {
         e.preventDefault();
         const file = item.getAsFile();
         if (file) {
+          const alt = window.prompt('이 이미지를 설명하는 대체 텍스트를 입력하세요 (검색엔진 노출에 도움돼요).', '') ?? '';
           statusEl.textContent = '이미지 업로드 중...';
           try {
             const url = await uploadImage(file);
-            editor.chain().focus().setImage({ src: url }).run();
+            editor.chain().focus().setImage({ src: url, alt }).run();
             statusEl.textContent = '';
           } catch {
             statusEl.textContent = '이미지 업로드에 실패했어요.';
