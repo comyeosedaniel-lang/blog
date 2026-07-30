@@ -27,7 +27,14 @@ const authed = await Astro.session?.get('authed');
       <a href={about} aria-current={active === 'about' ? 'page' : undefined}>{t('nav.about')}</a>
       <a href={langSwitch} id="lang-switch" data-lang={lang === 'en' ? 'ko' : 'en'}>{t('nav.lang')}</a>
       {authed ? (
-        <a href="/admin" class="site-nav__write-btn">관리자</a>
+        <>
+          <a href="/admin" class="site-nav__write-btn">관리자</a>
+          <a href="/admin/new" class="icon-btn" aria-label="새 글쓰기" title="새 글쓰기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </a>
+        </>
       ) : (
         <a href="/admin/login">로그인</a>
       )}
