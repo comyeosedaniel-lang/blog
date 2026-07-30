@@ -218,36 +218,8 @@ th, td {
   color: var(--accent);
 }
 
-.site-nav a.site-nav__write-btn,
-.site-nav a.site-nav__write-btn:hover {
-  padding: 0.4rem 0.9rem;
-  border-radius: var(--radius);
-  color: var(--accent-contrast);
-  background: var(--accent);
-  font-weight: 600;
-  transition: opacity 0.15s ease;
-}
-
-.site-nav a.site-nav__write-btn:hover {
-  opacity: 0.9;
-}
-
 .site-nav__logout-form {
   display: contents;
-}
-
-.site-nav__logout-form button {
-  font: inherit;
-  font-size: 0.9375rem;
-  color: var(--text-muted);
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
-
-.site-nav__logout-form button:hover {
-  color: var(--accent);
 }
 
 .icon-btn {
