@@ -5,12 +5,14 @@
 interface Env {
   ADMIN_PASSWORD_HASH?: string;
   NEWSLETTER_ADMIN_KEY?: string;
+  CRON_SECRET?: string;
 }
 
 declare namespace Cloudflare {
   interface Env {
     ADMIN_PASSWORD_HASH?: string;
     NEWSLETTER_ADMIN_KEY?: string;
+    CRON_SECRET?: string;
   }
 }
 

@@ -37,3 +37,16 @@ INSERT OR IGNORE INTO categories (id, ko, en, sort_order) VALUES
   ('book', '책 이야기', 'Book Stories', 1),
   ('life', '나의 이야기', 'My Story', 2),
   ('us', '우리의 이야기', 'Our Story', 3);
+
+CREATE TABLE IF NOT EXISTS feed_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  source TEXT NOT NULL,
+  title TEXT NOT NULL,
+  link TEXT NOT NULL UNIQUE,
+  summary TEXT,
+  published_at TEXT,
+  fetched_at TEXT NOT NULL DEFAULT (datetime('now')),
+  reviewed INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_feed_items_reviewed_fetched ON feed_items (reviewed, fetched_at DESC);

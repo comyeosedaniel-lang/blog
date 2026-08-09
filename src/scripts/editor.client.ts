@@ -23,7 +23,10 @@ if (root) {
   const editorEl = document.getElementById('editor')!;
   const statusEl = document.getElementById('write-status')!;
 
-  const initialContent = initial?.contentJson ? JSON.parse(initial.contentJson) : (initial?.contentHtml ?? '');
+  const sourceLink = root.dataset.sourceLink;
+  const initialContent = initial?.contentJson
+    ? JSON.parse(initial.contentJson)
+    : (initial?.contentHtml ?? (sourceLink ? `<p>출처: <a href="${sourceLink}">${sourceLink}</a></p><p></p>` : ''));
 
   const editor = new Editor({
     element: editorEl,

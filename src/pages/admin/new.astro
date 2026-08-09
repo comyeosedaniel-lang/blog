@@ -5,10 +5,13 @@ import AdminNav from '../../components/AdminNav.astro';
 import { SITE } from '../../site.config';
 
 export const prerender = false;
+
+const initialTitle = Astro.url.searchParams.get('title') ?? '';
+const initialSourceLink = Astro.url.searchParams.get('sourceLink') ?? '';
 ---
 
 <BaseLayout title="새 글쓰기" description={SITE.description.ko} lang="ko">
   <AdminNav active="new" />
   <h1 class="page-title">새 글쓰기</h1>
-  <WriteEditor />
+  <WriteEditor initialTitle={initialTitle} initialSourceLink={initialSourceLink} />
 </BaseLayout>

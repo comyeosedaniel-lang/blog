@@ -4,9 +4,11 @@ import type { AdminPostFull } from '../lib/posts';
 
 interface Props {
   post?: AdminPostFull | null;
+  initialTitle?: string;
+  initialSourceLink?: string;
 }
 
-const { post = null } = Astro.props;
+const { post = null, initialTitle = '', initialSourceLink = '' } = Astro.props;
 const isEdit = post !== null;
 const categories = await listCategories();
 ---
@@ -15,11 +17,12 @@ const categories = await listCategories();
   class="write-editor"
   data-post-id={post?.id ?? ''}
   data-hero-url={post?.heroImageUrl ?? ''}
+  data-source-link={initialSourceLink}
 >
   <div class="write-editor__row">
     <label class="write-field write-field--grow">
       <span>제목</span>
-      <input type="text" id="title" value={post?.title ?? ''} placeholder="제목을 입력하세요" />
+      <input type="text" id="title" value={post?.title ?? initialTitle} placeholder="제목을 입력하세요" />
     </label>
   </div>
 
