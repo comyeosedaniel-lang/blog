@@ -174,12 +174,16 @@ npx wrangler d1 execute my-blog-content --remote --command "INSERT INTO admin (i
 ```sh
 npx wrangler secret put NEWSLETTER_ADMIN_KEY
 # paste the same ADMIN_KEY value you set on newsletter-worker in step 2
+
+npx wrangler secret put CRON_SECRET
+# any random string — authenticates the scheduled news-feed fetch (step 8)
 ```
 
 For local development, also create a `.dev.vars` file (gitignored) with:
 
 ```
 NEWSLETTER_ADMIN_KEY=<same key as newsletter-worker's ADMIN_KEY>
+CRON_SECRET=<same value you set above>
 ```
 
 and run the same `INSERT INTO admin ...` command without `--remote` against
@@ -221,6 +225,22 @@ SSL certificate for you.
 Visit `/admin/login`, enter the password from step 5, and you're in. Posts
 publish instantly (no rebuild/redeploy) and, if not saved as a draft,
 trigger a broadcast email to confirmed newsletter subscribers automatically.
+
+## 8. News feed (optional)
+
+A Cron Trigger fetches RSS from a small set of hardware news sites every 6
+hours and stores new items in D1 for review at `/admin/feed` — nothing is
+ever auto-published. Edit `FEED_SOURCES` in `src/lib/feed.ts` to point at
+whatever feeds are relevant to your blog (or delete the feature entirely:
+remove that cron entry from `wrangler.jsonc`, `scripts/patch-worker-entry.mjs`,
+`src/lib/feed.ts`, `src/pages/api/cron/`, `src/pages/api/feed/`,
+`src/pages/api/feed-items/`, and `src/pages/admin/feed.astro`).
+
+Astro's Cloudflare adapter doesn't support Cron Triggers natively (it only
+emits a `fetch` handler), so `npm run build` runs a `postbuild` step
+(`scripts/patch-worker-entry.mjs`) that wraps the generated Worker entry
+with a `scheduled()` handler. If you remove the feed feature, you can
+remove this postbuild step too — otherwise leave it as-is.
 
 ## Notes
 
