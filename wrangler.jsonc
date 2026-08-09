@@ -21,6 +21,9 @@
 			"bucket_name": "mylineal-uploads"
 		}
 	],
+	"ai": {
+		"binding": "AI"
+	},
 	"routes": [
 		{
 			"pattern": "blog.mylineal.com",

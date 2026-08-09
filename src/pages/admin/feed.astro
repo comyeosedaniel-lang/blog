@@ -35,17 +35,19 @@ const { results } = await env.DB.prepare(
     ) : (
       <ul class="feed-admin__list" id="feed-list">
         {results.map((item) => (
-          <li class="feed-admin__item" data-id={item.id}>
+          <li class="feed-admin__item" data-id={item.id} data-title={item.title} data-summary={item.summary ?? ''}>
             <div class="feed-admin__meta">
               <span class="feed-admin__source">{item.source}</span>
               {item.published_at && <time>{new Date(item.published_at).toLocaleDateString('ko-KR')}</time>}
             </div>
             <a class="feed-admin__title" href={item.link} target="_blank" rel="noopener noreferrer">{item.title}</a>
             {item.summary && <p class="feed-admin__summary">{item.summary}</p>}
+            <p class="feed-admin__translated" hidden></p>
             <div class="feed-admin__actions">
               <a class="write-btn write-btn--primary" href={`/admin/new?title=${encodeURIComponent(item.title)}&sourceLink=${encodeURIComponent(item.link)}`}>
                 이 글로 초안 만들기
               </a>
+              <button type="button" class="write-btn feed-admin__translate">번역</button>
               <button type="button" class="write-btn feed-admin__mark-read">읽음 표시</button>
               <button type="button" class="write-btn write-btn--danger feed-admin__delete">삭제</button>
             </div>
@@ -68,6 +70,30 @@ const { results } = await env.DB.prepare(
     const item = target.closest<HTMLLIElement>('.feed-admin__item');
     if (!item) return;
     const id = item.dataset.id;
+
+    if (target.classList.contains('feed-admin__translate')) {
+      const translatedEl = item.querySelector<HTMLParagraphElement>('.feed-admin__translated')!;
+      const btn = target as HTMLButtonElement;
+      btn.disabled = true;
+      btn.textContent = '번역 중...';
+      try {
+        const text = [item.dataset.title, item.dataset.summary].filter(Boolean).join('\n\n');
+        const res = await fetch('/api/feed/translate', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ text }),
+        });
+        const data = (await res.json().catch(() => ({}))) as { translated?: string; error?: string };
+        translatedEl.textContent = res.ok ? data.translated ?? '' : (data.error ?? '번역에 실패했어요.');
+        translatedEl.hidden = false;
+      } catch {
+        translatedEl.textContent = '번역 중 문제가 생겼어요.';
+        translatedEl.hidden = false;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '번역';
+      }
+    }
 
     if (target.classList.contains('feed-admin__mark-read')) {
       const res = await fetch(`/api/feed-items/${id}`, { method: 'PATCH' });
@@ -162,6 +188,16 @@ const { results } = await env.DB.prepare(
     font-size: 0.875rem;
     color: var(--text-muted);
     margin: 0 0 0.75rem;
+  }
+
+  .feed-admin__translated {
+    font-size: 0.875rem;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border-left: 3px solid var(--accent);
+    padding: 0.5rem 0.75rem;
+    margin: 0 0 0.75rem;
+    white-space: pre-wrap;
   }
 
   .feed-admin__actions {
