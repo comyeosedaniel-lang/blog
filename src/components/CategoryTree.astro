@@ -21,10 +21,13 @@ const grouped = categories.map((cat) => {
   return {
     id: cat.id,
     label: lang === 'en' ? cat.en : cat.ko,
-    posts: categoryPosts.slice(0, MAX_POSTS_SHOWN),
+    posts: categoryPosts,
     remaining: Math.max(0, categoryPosts.length - MAX_POSTS_SHOWN),
   };
 });
+
+const moreLabel = (n: number) => (lang === 'en' ? `+${n} more` : `+${n}개 더보기`);
+const lessLabel = lang === 'en' ? 'Show less' : '접기';
 ---
 
 <nav class="category-tree" aria-label={lang === 'en' ? 'Categories' : '카테고리'}>
@@ -41,11 +44,12 @@ const grouped = categories.map((cat) => {
         </a>
         {cat.posts.length > 0 && (
           <ul class="category-tree__posts">
-            {cat.posts.map((entry) => {
+            {cat.posts.map((entry, i) => {
               const slug = entry.id.replace(/^(ko|en)\//, '');
               const href = `${basePath}/blog/${slug}/`;
+              const isExtra = i >= MAX_POSTS_SHOWN;
               return (
-                <li>
+                <li class={isExtra ? 'category-tree__extra-post' : undefined} hidden={isExtra}>
                   <a href={href} class="category-tree__post-title" title={entry.data.title}>
                     {entry.data.title}
                   </a>
@@ -54,9 +58,14 @@ const grouped = categories.map((cat) => {
             })}
             {cat.remaining > 0 && (
               <li>
-                <a href={`${basePath}/category/${cat.id}/`} class="category-tree__more">
-                  {lang === 'en' ? `+${cat.remaining} more` : `+${cat.remaining}개 더보기`}
-                </a>
+                <button
+                  type="button"
+                  class="category-tree__toggle"
+                  data-more-label={moreLabel(cat.remaining)}
+                  data-less-label={lessLabel}
+                >
+                  {moreLabel(cat.remaining)}
+                </button>
               </li>
             )}
           </ul>
@@ -65,6 +74,18 @@ const grouped = categories.map((cat) => {
     ))
   }
 </nav>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.category-tree__toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const group = btn.closest('.category-tree__group');
+      const extraPosts = group?.querySelectorAll<HTMLLIElement>('.category-tree__extra-post');
+      const isExpanding = extraPosts?.[0]?.hidden ?? false;
+      extraPosts?.forEach((li) => (li.hidden = !isExpanding));
+      btn.textContent = (isExpanding ? btn.dataset.lessLabel : btn.dataset.moreLabel) ?? '';
+    });
+  });
+</script>
 
 <style>
   .category-tree {
@@ -127,15 +148,20 @@ const grouped = categories.map((cat) => {
     color: var(--accent);
   }
 
-  .category-tree__more {
+  .category-tree__toggle {
     display: block;
+    width: 100%;
+    text-align: left;
     color: var(--accent);
-    text-decoration: none;
+    background: none;
+    border: none;
+    font: inherit;
     font-size: 0.8125rem;
     padding: 0.3rem 0 0.3rem 0.85rem;
+    cursor: pointer;
   }
 
-  .category-tree__more:hover {
+  .category-tree__toggle:hover {
     text-decoration: underline;
   }
 
