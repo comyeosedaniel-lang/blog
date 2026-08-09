@@ -77,14 +77,13 @@ const { results } = await env.DB.prepare(
       btn.disabled = true;
       btn.textContent = '번역 중...';
       try {
-        const text = [item.dataset.title, item.dataset.summary].filter(Boolean).join('\n\n');
         const res = await fetch('/api/feed/translate', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({ title: item.dataset.title ?? '', summary: item.dataset.summary ?? '' }),
         });
-        const data = (await res.json().catch(() => ({}))) as { translated?: string; error?: string };
-        translatedEl.textContent = res.ok ? data.translated ?? '' : (data.error ?? '번역에 실패했어요.');
+        const data = (await res.json().catch(() => ({}))) as { title?: string; summary?: string; error?: string };
+        translatedEl.textContent = res.ok ? [data.title, data.summary].filter(Boolean).join('\n\n') : (data.error ?? '번역에 실패했어요.');
         translatedEl.hidden = false;
       } catch {
         translatedEl.textContent = '번역 중 문제가 생겼어요.';

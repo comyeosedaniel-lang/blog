@@ -68,6 +68,13 @@ function stripHtml(text: string): string {
     .trim();
 }
 
+// WordPress feeds append "The post X appeared first on Y" to the excerpt —
+// often truncated mid-sentence by the 400-char slice below, which reliably
+// confused the translation model into giving up partway through.
+function stripFeedBoilerplate(text: string): string {
+  return text.replace(/\bThe post\b.*$/is, '').trim();
+}
+
 function toIsoDate(raw: unknown): string | null {
   if (typeof raw !== 'string') return null;
   const parsed = new Date(raw);
@@ -93,7 +100,8 @@ function parseFeedXml(xml: string, sourceName: string): FeedItem[] {
       if (!title || !link) return null;
 
       const summaryRaw = item.description ?? item.summary ?? item['content:encoded'] ?? '';
-      const summary = typeof summaryRaw === 'string' ? stripHtml(summaryRaw).slice(0, 400) : null;
+      const summary =
+        typeof summaryRaw === 'string' ? stripFeedBoilerplate(stripHtml(summaryRaw)).slice(0, 400).trim() : null;
 
       return {
         source: sourceName,
