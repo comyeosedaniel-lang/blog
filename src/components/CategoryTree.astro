@@ -12,13 +12,19 @@ const { lang, activeCategory } = Astro.props;
 const t = useTranslations(lang);
 const basePath = lang === 'en' ? '/en' : '';
 
+const MAX_POSTS_SHOWN = 5;
+
 const [posts, categories] = await Promise.all([listPosts({ lang }), listCategories()]);
 
-const grouped = categories.map((cat) => ({
-  id: cat.id,
-  label: lang === 'en' ? cat.en : cat.ko,
-  posts: posts.filter((p) => p.data.category === cat.id),
-}));
+const grouped = categories.map((cat) => {
+  const categoryPosts = posts.filter((p) => p.data.category === cat.id);
+  return {
+    id: cat.id,
+    label: lang === 'en' ? cat.en : cat.ko,
+    posts: categoryPosts.slice(0, MAX_POSTS_SHOWN),
+    remaining: Math.max(0, categoryPosts.length - MAX_POSTS_SHOWN),
+  };
+});
 ---
 
 <nav class="category-tree" aria-label={lang === 'en' ? 'Categories' : '카테고리'}>
@@ -46,6 +52,13 @@ const grouped = categories.map((cat) => ({
                 </li>
               );
             })}
+            {cat.remaining > 0 && (
+              <li>
+                <a href={`${basePath}/category/${cat.id}/`} class="category-tree__more">
+                  {lang === 'en' ? `+${cat.remaining} more` : `+${cat.remaining}개 더보기`}
+                </a>
+              </li>
+            )}
           </ul>
         )}
       </div>
@@ -112,6 +125,18 @@ const grouped = categories.map((cat) => ({
 
   .category-tree__post-title:hover {
     color: var(--accent);
+  }
+
+  .category-tree__more {
+    display: block;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.8125rem;
+    padding: 0.3rem 0 0.3rem 0.85rem;
+  }
+
+  .category-tree__more:hover {
+    text-decoration: underline;
   }
 
   @media (max-width: 48rem) {
