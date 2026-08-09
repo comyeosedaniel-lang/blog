@@ -16,7 +16,7 @@ export const prerender = false;
         <input type="password" id="currentPassword" required autocomplete="current-password" />
       </label>
       <label class="settings__field">
-        <span>새 비밀번호 (8자 이상)</span>
+        <span>새 비밀번호 (영문+숫자 포함 8자 이상)</span>
         <input type="password" id="newPassword" required minlength="8" autocomplete="new-password" />
       </label>
       <label class="settings__field">
@@ -46,6 +46,16 @@ export const prerender = false;
       return;
     }
 
+    if (newPassword.length < 8 || !/[a-zA-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      status.textContent = '새 비밀번호는 영문과 숫자를 포함해 8자 이상이어야 해요.';
+      return;
+    }
+
+    if (newPassword === currentPassword) {
+      status.textContent = '새 비밀번호가 기존 비밀번호와 같아요.';
+      return;
+    }
+
     status.textContent = '변경하는 중...';
 
     try {
@@ -59,8 +69,8 @@ export const prerender = false;
         status.textContent = data.error ?? '변경에 실패했어요.';
         return;
       }
-      status.textContent = '비밀번호가 변경됐어요.';
-      form.reset();
+      status.textContent = '비밀번호가 변경됐어요. 이동할게요...';
+      window.location.href = '/admin';
     } catch {
       status.textContent = '변경 중 문제가 생겼어요.';
     }
