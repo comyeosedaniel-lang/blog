@@ -1,0 +1,33 @@
+---
+import { searchPosts } from '../../lib/posts';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import SearchBox from '../../components/SearchBox.astro';
+import { SITE } from '../../site.config';
+import { useTranslations } from '../../i18n/ui';
+
+export const prerender = false;
+
+const t = useTranslations('en');
+const query = Astro.url.searchParams.get('q')?.trim() ?? '';
+const posts = query ? await searchPosts('en', query) : [];
+---
+
+<BaseLayout title={`${t('search.resultsFor')}: ${query}`} description={SITE.description.en} lang="en" sidebar>
+  <h1 class="page-title">{t('search.resultsFor')}{query && <>: “{query}”</>}</h1>
+  <SearchBox lang="en" query={query} />
+
+  {!query ? (
+    <p class="empty-state">{t('search.prompt')}</p>
+  ) : posts.length === 0 ? (
+    <p class="empty-state">{t('search.empty')}</p>
+  ) : (
+    <ul class="post-list">
+      {posts.map((entry) => (
+        <li>
+          <PostCard entry={entry} lang="en" />
+        </li>
+      ))}
+    </ul>
+  )}
+</BaseLayout>

@@ -82,6 +82,23 @@ export async function listPosts({ lang, category, includeDrafts = false, limit }
   return results.map(toEntry);
 }
 
+export async function searchPosts(lang: Lang, query: string): Promise<PostEntry[]> {
+  const trimmed = query.trim();
+  if (!trimmed) return [];
+
+  const like = `%${trimmed}%`;
+  const { results } = await env.DB.prepare(
+    `SELECT * FROM posts
+     WHERE lang = ?1 AND draft = 0
+       AND (title LIKE ?2 OR description LIKE ?2 OR tags LIKE ?2)
+     ORDER BY pub_date DESC`,
+  )
+    .bind(lang, like)
+    .all<PostRow>();
+
+  return results.map(toEntry);
+}
+
 export async function getPostBySlug(lang: Lang, slug: string, includeDrafts = false): Promise<PostEntry | null> {
   const conditions = ['lang = ?1', 'slug = ?2'];
   const params: unknown[] = [lang, slug];

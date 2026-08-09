@@ -36,6 +36,11 @@ export const ui = {
     'subscribe.success': '확인 메일을 보냈어요. 받은편지함을 확인해주세요.',
     'subscribe.alreadySubscribed': '이미 구독 중인 이메일이에요.',
     'subscribe.error': '문제가 생겼어요. 잠시 후 다시 시도해 주세요.',
+    'search.placeholder': '글 검색...',
+    'search.submit': '검색',
+    'search.resultsFor': '검색 결과',
+    'search.empty': '검색 결과가 없어요.',
+    'search.prompt': '검색어를 입력해 주세요.',
   },
   en: {
     'nav.home': 'Home',
@@ -70,6 +75,11 @@ export const ui = {
     'subscribe.success': 'Check your inbox to confirm your subscription.',
     'subscribe.alreadySubscribed': 'This email is already subscribed.',
     'subscribe.error': 'Something went wrong. Please try again.',
+    'search.placeholder': 'Search posts...',
+    'search.submit': 'Search',
+    'search.resultsFor': 'Search results',
+    'search.empty': 'No results found.',
+    'search.prompt': 'Enter a search term.',
   },
 } as const;
 
