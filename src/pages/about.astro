@@ -1,8 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../site.config';
+import { listCategories } from '../lib/categories';
 
 const title = '소개';
+const categories = await listCategories();
 ---
 
 <BaseLayout
@@ -15,8 +17,23 @@ const title = '소개';
   <h1 class="page-title">{title}</h1>
   <div class="prose">
     <p>
-      이 페이지는 아직 비어 있어요. <code>src/pages/about.astro</code> 파일을 열어
-      자기소개, 하는 일, 연락처 등 원하는 내용으로 자유롭게 채워보세요.
+      <strong>{SITE.title}</strong>는 {SITE.description.ko} 개발하면서 배운 것, 읽은 책, 일상의
+      기록, 그리고 컴퓨터 관련 소식을 다룹니다.
+    </p>
+    <p>이런 이야기를 다뤄요.</p>
+    <ul>
+      {categories.map((c) => (
+        <li><a href={`/category/${c.id}/`}>{c.ko}</a></li>
+      ))}
+    </ul>
+    <p>
+      새 글은 <a href="/rss.xml">RSS</a>나 아래 이메일 구독으로 받아보실 수 있고, 각 글 아래
+      댓글로 편하게 이야기 남겨주세요. 이 블로그는 한국어와 <a href="/en/about/">English</a>를
+      함께 지원해요.
+    </p>
+    <p>
+      블로그 소스코드는 <a href={SITE.github} target="_blank" rel="noopener noreferrer">GitHub</a>에서
+      볼 수 있어요.
     </p>
   </div>
 </BaseLayout>
