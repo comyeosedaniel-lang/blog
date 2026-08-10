@@ -3,6 +3,7 @@ import type { Lang } from '../i18n/ui';
 
 export interface PostEntry {
   id: string; // `${lang}/${slug}`, matches the comments/newsletter postId format
+  dbId: number;
   slug: string;
   data: {
     title: string;
@@ -36,6 +37,7 @@ interface PostRow {
 function toEntry(row: PostRow): PostEntry {
   return {
     id: `${row.lang}/${row.slug}`,
+    dbId: row.id,
     slug: row.slug,
     data: {
       title: row.title,
