@@ -11,6 +11,7 @@ import { SITE, SEO_VERIFICATION } from '../site.config';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import CategoryTree from '../components/CategoryTree.astro';
+import ScrollToTop from '../components/ScrollToTop.astro';
 import type { Lang } from '../i18n/ui';
 
 const DEFAULT_OG_IMAGE = '/images/og-default.jpg';
@@ -125,5 +126,6 @@ const alternateLang = lang === 'en' ? 'ko' : 'en';
       )}
     </main>
     <Footer lang={lang} />
+    <ScrollToTop lang={lang} />
   </body>
 </html>
