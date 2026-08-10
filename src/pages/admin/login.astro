@@ -14,7 +14,11 @@ const error = Astro.url.searchParams.get('error');
       <span>비밀번호</span>
       <input type="password" name="password" required autofocus />
     </label>
-    {error && <p class="login-form__error">비밀번호가 맞지 않아요.</p>}
+    {error === 'locked' ? (
+      <p class="login-form__error">로그인 시도가 너무 많아요. 15분 후 다시 시도해주세요.</p>
+    ) : (
+      error && <p class="login-form__error">비밀번호가 맞지 않아요.</p>
+    )}
     <button type="submit" class="login-form__submit">로그인</button>
   </form>
 </BaseLayout>

@@ -25,6 +25,12 @@ CREATE TABLE IF NOT EXISTS admin (
   password_hash TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS login_attempts (
+  ip TEXT PRIMARY KEY,
+  count INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS categories (
   id TEXT PRIMARY KEY,
   ko TEXT NOT NULL,
