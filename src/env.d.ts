@@ -6,6 +6,7 @@ interface Env {
   ADMIN_PASSWORD_HASH?: string;
   NEWSLETTER_ADMIN_KEY?: string;
   CRON_SECRET?: string;
+  COMMENTS_ADMIN_KEY?: string;
 }
 
 declare namespace Cloudflare {
@@ -13,6 +14,7 @@ declare namespace Cloudflare {
     ADMIN_PASSWORD_HASH?: string;
     NEWSLETTER_ADMIN_KEY?: string;
     CRON_SECRET?: string;
+    COMMENTS_ADMIN_KEY?: string;
   }
 }
 

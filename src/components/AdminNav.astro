@@ -1,6 +1,6 @@
 ---
 interface Props {
-  active?: 'dashboard' | 'new' | 'categories' | 'settings' | 'feed';
+  active?: 'dashboard' | 'new' | 'categories' | 'settings' | 'feed' | 'comments';
 }
 
 const { active } = Astro.props;
@@ -10,6 +10,7 @@ const { active } = Astro.props;
   <a href="/admin" aria-current={active === 'dashboard' ? 'page' : undefined}>글 목록</a>
   <a href="/admin/new" aria-current={active === 'new' ? 'page' : undefined}>새 글쓰기</a>
   <a href="/admin/feed" aria-current={active === 'feed' ? 'page' : undefined}>뉴스 피드</a>
+  <a href="/admin/comments" aria-current={active === 'comments' ? 'page' : undefined}>댓글 관리</a>
   <a href="/admin/categories" aria-current={active === 'categories' ? 'page' : undefined}>카테고리 관리</a>
   <a href="/admin/settings" aria-current={active === 'settings' ? 'page' : undefined}>비밀번호 변경</a>
   <form method="POST" action="/api/logout" class="admin-nav__logout">

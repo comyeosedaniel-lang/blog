@@ -1,7 +1,14 @@
 import { defineMiddleware } from 'astro:middleware';
 
 const PROTECTED_PAGE_PREFIXES = ['/admin'];
-const PROTECTED_API_PREFIXES = ['/api/posts', '/api/upload', '/api/change-password', '/api/categories', '/api/feed'];
+const PROTECTED_API_PREFIXES = [
+  '/api/posts',
+  '/api/upload',
+  '/api/change-password',
+  '/api/categories',
+  '/api/feed',
+  '/api/comments',
+];
 const PUBLIC_PATHS = new Set(['/admin/login', '/api/login', '/api/logout']);
 
 export const onRequest = defineMiddleware(async (context, next) => {

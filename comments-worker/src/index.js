@@ -104,6 +104,38 @@ export default {
       return json({ comment: result }, 201, origin);
     }
 
+    if (url.pathname === '/comments/recent' && request.method === 'GET') {
+      if (url.searchParams.get('adminKey') !== env.ADMIN_KEY) {
+        return json({ error: 'unauthorized' }, 401, origin);
+      }
+
+      const limit = Math.min(200, Number(url.searchParams.get('limit') ?? '50') || 50);
+      const { results } = await env.DB.prepare(
+        'SELECT id, post_id, name, message, created_at FROM comments ORDER BY created_at DESC LIMIT ?1',
+      )
+        .bind(limit)
+        .all();
+
+      return json({ comments: results }, 200, origin);
+    }
+
+    const deleteMatch = url.pathname.match(/^\/comments\/(\d+)$/);
+    if (deleteMatch && request.method === 'DELETE') {
+      let body;
+      try {
+        body = await request.json();
+      } catch {
+        body = {};
+      }
+
+      if (body.adminKey !== env.ADMIN_KEY) {
+        return json({ error: 'unauthorized' }, 401, origin);
+      }
+
+      await env.DB.prepare('DELETE FROM comments WHERE id = ?1').bind(Number(deleteMatch[1])).run();
+      return json({ ok: true }, 200, origin);
+    }
+
     return json({ error: 'not found' }, 404, origin);
   },
 };

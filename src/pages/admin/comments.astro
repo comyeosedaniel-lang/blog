@@ -1,0 +1,122 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdminNav from '../../components/AdminNav.astro';
+import { SITE } from '../../site.config';
+import { listRecentComments } from '../../lib/comments';
+
+export const prerender = false;
+
+const comments = await listRecentComments(100);
+
+function postHref(postId: string): string {
+  const [lang, ...rest] = postId.split('/');
+  const slug = rest.join('/');
+  return lang === 'en' ? `/en/blog/${slug}/` : `/blog/${slug}/`;
+}
+---
+
+<BaseLayout title="댓글 관리" description={SITE.description.ko} lang="ko">
+  <AdminNav active="comments" />
+  <h1 class="page-title">댓글 관리</h1>
+
+  {comments.length === 0 ? (
+    <p class="empty-state">아직 댓글이 없어요.</p>
+  ) : (
+    <ul class="comments-admin__list" id="comments-admin-list">
+      {comments.map((c) => (
+        <li class="comments-admin__row" data-id={c.id}>
+          <div class="comments-admin__meta">
+            <a href={postHref(c.post_id)} target="_blank" rel="noopener noreferrer">{c.post_id}</a>
+            <span class="comments-admin__name">{c.name}</span>
+            <time>{c.created_at}</time>
+          </div>
+          <p class="comments-admin__message">{c.message}</p>
+          <button type="button" class="write-btn write-btn--danger comments-admin__delete">삭제</button>
+        </li>
+      ))}
+    </ul>
+  )}
+  <p id="comments-admin-status" class="comments-admin__status" role="status"></p>
+</BaseLayout>
+
+<script>
+  const list = document.getElementById('comments-admin-list');
+  const status = document.getElementById('comments-admin-status')!;
+
+  list?.addEventListener('click', async (e) => {
+    const target = e.target as HTMLElement;
+    if (!target.classList.contains('comments-admin__delete')) return;
+
+    const row = target.closest<HTMLLIElement>('.comments-admin__row')!;
+    const id = row.dataset.id;
+    if (!window.confirm('이 댓글을 삭제할까요?')) return;
+
+    status.textContent = '삭제하는 중...';
+    const res = await fetch(`/api/comments/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      row.remove();
+      status.textContent = '삭제했어요.';
+    } else {
+      status.textContent = '삭제에 실패했어요.';
+    }
+  });
+</script>
+
+<style>
+  .comments-admin__list {
+    list-style: none;
+    margin: 0 0 1rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .comments-admin__row {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.85rem 1rem;
+  }
+
+  .comments-admin__meta {
+    display: flex;
+    gap: 0.6rem;
+    align-items: baseline;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .comments-admin__name {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .comments-admin__message {
+    margin: 0 0 0.6rem;
+    font-size: 0.9375rem;
+    white-space: pre-wrap;
+  }
+
+  .write-btn {
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.35rem 0.8rem;
+    cursor: pointer;
+  }
+
+  .write-btn--danger {
+    color: #c0392b;
+  }
+
+  .comments-admin__status {
+    min-height: 1.2em;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+</style>
