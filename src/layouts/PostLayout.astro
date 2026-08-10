@@ -5,7 +5,7 @@ import { estimateReadingTime } from '../lib/readingTime';
 import CategoryBadge from '../components/CategoryBadge.astro';
 import Comments from '../components/Comments.astro';
 import { SITE } from '../site.config';
-import type { PostEntry } from '../lib/posts';
+import { getNextPost, type PostEntry } from '../lib/posts';
 
 interface Props {
   entry: PostEntry;
@@ -23,6 +23,10 @@ const formattedDate = pubDate.toLocaleDateString(dateLocale, dateOpts);
 const formattedUpdated = updatedDate?.toLocaleDateString(dateLocale, dateOpts);
 
 const backHref = lang === 'en' ? '/en/' : '/';
+const basePath = lang === 'en' ? '/en' : '';
+
+const nextPost = await getNextPost(lang, category, pubDate);
+const nextHref = nextPost ? `${basePath}/blog/${nextPost.slug}/` : null;
 
 const postURL = new URL(Astro.url.pathname, Astro.site).toString();
 const structuredData = {
@@ -72,6 +76,13 @@ const structuredData = {
       <slot />
     </div>
 
+    {nextPost && nextHref && (
+      <a class="next-post" href={nextHref}>
+        <span class="next-post__label">{t('post.next')}</span>
+        <span class="next-post__title">{nextPost.data.title} &rarr;</span>
+      </a>
+    )}
+
     <Comments postId={entry.id} lang={lang} />
 
     <a class="back-link" href={backHref}>&larr; {t('post.back')}</a>
@@ -89,5 +100,37 @@ const structuredData = {
   .prose img {
     -webkit-user-drag: none;
     user-select: none;
+  }
+
+  .next-post {
+    display: block;
+    margin: 2.5rem 0;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elevated);
+    text-decoration: none;
+  }
+
+  .next-post__label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+  }
+
+  .next-post__title {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .next-post:hover .next-post__title {
+    color: var(--accent);
   }
 </style>

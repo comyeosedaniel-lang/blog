@@ -82,6 +82,18 @@ export async function listPosts({ lang, category, includeDrafts = false, limit }
   return results.map(toEntry);
 }
 
+export async function getNextPost(lang: Lang, category: string, afterPubDate: Date): Promise<PostEntry | null> {
+  const row = await env.DB.prepare(
+    `SELECT * FROM posts
+     WHERE lang = ?1 AND category = ?2 AND draft = 0 AND pub_date > ?3
+     ORDER BY pub_date ASC LIMIT 1`,
+  )
+    .bind(lang, category, afterPubDate.toISOString())
+    .first<PostRow>();
+
+  return row ? toEntry(row) : null;
+}
+
 export async function searchPosts(lang: Lang, query: string): Promise<PostEntry[]> {
   const trimmed = query.trim();
   if (!trimmed) return [];
