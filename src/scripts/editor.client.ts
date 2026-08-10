@@ -326,19 +326,11 @@ if (root) {
   }
 
   // --- Save / publish ---
-  async function save(draft: boolean) {
-    const slug = (document.getElementById('slug') as HTMLInputElement).value.trim();
-    const title = (document.getElementById('title') as HTMLInputElement).value.trim();
-
-    if (!slug || !title) {
-      setStatus('제목과 주소(슬러그)는 필수예요.', true);
-      return;
-    }
-
-    const payload = {
-      slug,
+  function currentFormValues() {
+    return {
+      slug: (document.getElementById('slug') as HTMLInputElement).value.trim(),
       lang: (document.getElementById('lang') as unknown as HTMLSelectElement).value,
-      title,
+      title: (document.getElementById('title') as HTMLInputElement).value.trim(),
       description: (document.getElementById('description') as HTMLTextAreaElement).value.trim(),
       category: (document.getElementById('category') as unknown as HTMLSelectElement).value,
       tags: (document.getElementById('tags') as HTMLInputElement).value
@@ -348,8 +340,18 @@ if (root) {
       contentHtml: editor.getHTML(),
       contentJson: JSON.stringify(editor.getJSON()),
       heroImageUrl: heroUrlField.value || null,
-      draft,
     };
+  }
+
+  async function save(draft: boolean) {
+    const values = currentFormValues();
+
+    if (!values.slug || !values.title) {
+      setStatus('제목과 주소(슬러그)는 필수예요.', true);
+      return;
+    }
+
+    const payload = { ...values, draft };
 
     setStatus('저장하는 중...');
 
@@ -387,6 +389,12 @@ if (root) {
 
   document.getElementById('save-draft')?.addEventListener('click', () => save(true));
   document.getElementById('publish')?.addEventListener('click', () => save(false));
+
+  // Show the SEO check right away when opening an existing (draft or already-published) post,
+  // not only right after clicking save.
+  if (initial) {
+    renderSeoCheck(runSeoCheck(currentFormValues()));
+  }
 
   document.getElementById('delete-post')?.addEventListener('click', async () => {
     if (!postId) return;
