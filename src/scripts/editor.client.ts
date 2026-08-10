@@ -23,6 +23,11 @@ if (root) {
   const editorEl = document.getElementById('editor')!;
   const statusEl = document.getElementById('write-status')!;
 
+  function setStatus(message: string, isError = false) {
+    statusEl.textContent = isError && message ? `⚠ ${message}` : message;
+    statusEl.classList.toggle('write-editor__status--error', isError);
+  }
+
   const sourceLink = root.dataset.sourceLink;
 
   function isEmptyDoc(json: unknown): boolean {
@@ -159,9 +164,9 @@ if (root) {
     try {
       const url = await uploadImage(file);
       editor.chain().focus().setImage({ src: url, alt }).run();
-      statusEl.textContent = '';
+      setStatus('');
     } catch {
-      statusEl.textContent = '이미지 업로드에 실패했어요.';
+      setStatus('이미지 업로드에 실패했어요.', true);
     } finally {
       imageInput.value = '';
     }
@@ -180,9 +185,9 @@ if (root) {
           try {
             const url = await uploadImage(file);
             editor.chain().focus().setImage({ src: url, alt }).run();
-            statusEl.textContent = '';
+            setStatus('');
           } catch {
-            statusEl.textContent = '이미지 업로드에 실패했어요.';
+            setStatus('이미지 업로드에 실패했어요.', true);
           }
         }
       }
@@ -202,9 +207,9 @@ if (root) {
       heroUrlField.value = url;
       heroPreview.src = url;
       heroPreview.hidden = false;
-      statusEl.textContent = '';
+      setStatus('');
     } catch {
-      statusEl.textContent = '대문 이미지 업로드에 실패했어요.';
+      setStatus('대문 이미지 업로드에 실패했어요.', true);
     }
   });
 
@@ -220,7 +225,7 @@ if (root) {
     const title = (document.getElementById('title') as HTMLInputElement).value.trim();
 
     if (!slug || !title) {
-      statusEl.textContent = '제목과 주소(슬러그)는 필수예요.';
+      setStatus('제목과 주소(슬러그)는 필수예요.', true);
       return;
     }
 
@@ -240,7 +245,7 @@ if (root) {
       draft,
     };
 
-    statusEl.textContent = '저장하는 중...';
+    setStatus('저장하는 중...');
 
     const url = postId ? `/api/posts/${postId}` : '/api/posts';
     const method = postId ? 'PUT' : 'POST';
@@ -253,12 +258,12 @@ if (root) {
       });
       if (!res.ok) {
         const err = (await res.json().catch(() => ({}))) as { error?: string };
-        statusEl.textContent = `저장 실패: ${err.error ?? res.status}`;
+        setStatus(`저장 실패: ${err.error ?? res.status}`, true);
         return;
       }
       window.location.href = '/admin';
     } catch {
-      statusEl.textContent = '저장 중 문제가 생겼어요.';
+      setStatus('저장 중 문제가 생겼어요. 네트워크 연결을 확인해주세요.', true);
     }
   }
 
@@ -272,7 +277,7 @@ if (root) {
     if (res.ok) {
       window.location.href = '/admin';
     } else {
-      statusEl.textContent = '삭제에 실패했어요.';
+      setStatus('삭제에 실패했어요.', true);
     }
   });
 }
