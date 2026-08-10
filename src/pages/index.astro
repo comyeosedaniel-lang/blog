@@ -10,7 +10,7 @@ import { useTranslations } from '../i18n/ui';
 
 const t = useTranslations('ko');
 
-const posts = await listPosts({ lang: 'ko' });
+const posts = await listPosts({ lang: 'ko', limit: 10 });
 
 const structuredData = {
   '@context': 'https://schema.org',
