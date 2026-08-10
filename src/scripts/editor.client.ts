@@ -60,6 +60,24 @@ if (root) {
     content: initialContent,
   });
 
+  // --- Unsaved-changes guard ---
+  let isDirty = false;
+  const markDirty = () => {
+    isDirty = true;
+  };
+
+  editor.on('update', markDirty);
+  ['title', 'slug', 'lang', 'category', 'description', 'tags'].forEach((id) => {
+    document.getElementById(id)?.addEventListener('input', markDirty);
+    document.getElementById(id)?.addEventListener('change', markDirty);
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (!isDirty) return;
+    e.preventDefault();
+    e.returnValue = '';
+  });
+
   function slugify(str: string): string {
     return str
       .trim()
@@ -207,6 +225,7 @@ if (root) {
       heroUrlField.value = url;
       heroPreview.src = url;
       heroPreview.hidden = false;
+      markDirty();
       setStatus('');
     } catch {
       setStatus('대문 이미지 업로드에 실패했어요.', true);
@@ -261,6 +280,7 @@ if (root) {
         setStatus(`저장 실패: ${err.error ?? res.status}`, true);
         return;
       }
+      isDirty = false;
       window.location.href = '/admin';
     } catch {
       setStatus('저장 중 문제가 생겼어요. 네트워크 연결을 확인해주세요.', true);
@@ -275,6 +295,7 @@ if (root) {
     if (!window.confirm('정말 이 글을 삭제할까요?')) return;
     const res = await fetch(`/api/posts/${postId}`, { method: 'DELETE' });
     if (res.ok) {
+      isDirty = false;
       window.location.href = '/admin';
     } else {
       setStatus('삭제에 실패했어요.', true);
