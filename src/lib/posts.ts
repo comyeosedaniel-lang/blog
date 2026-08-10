@@ -58,9 +58,16 @@ interface ListOptions {
   category?: string;
   includeDrafts?: boolean;
   limit?: number;
+  offset?: number;
 }
 
-export async function listPosts({ lang, category, includeDrafts = false, limit }: ListOptions): Promise<PostEntry[]> {
+export async function listPosts({
+  lang,
+  category,
+  includeDrafts = false,
+  limit,
+  offset,
+}: ListOptions): Promise<PostEntry[]> {
   const conditions = ['lang = ?1'];
   const params: unknown[] = [lang];
 
@@ -75,6 +82,9 @@ export async function listPosts({ lang, category, includeDrafts = false, limit }
   let query = `SELECT * FROM posts WHERE ${conditions.join(' AND ')} ORDER BY pub_date DESC`;
   if (limit) {
     query += ` LIMIT ${Number(limit)}`;
+    if (offset) {
+      query += ` OFFSET ${Number(offset)}`;
+    }
   }
 
   const { results } = await env.DB.prepare(query)
@@ -82,6 +92,21 @@ export async function listPosts({ lang, category, includeDrafts = false, limit }
     .all<PostRow>();
 
   return results.map(toEntry);
+}
+
+export async function countPosts(lang: Lang, category?: string): Promise<number> {
+  const conditions = ['lang = ?1', 'draft = 0'];
+  const params: unknown[] = [lang];
+  if (category) {
+    params.push(category);
+    conditions.push(`category = ?${params.length}`);
+  }
+
+  const row = await env.DB.prepare(`SELECT COUNT(*) as count FROM posts WHERE ${conditions.join(' AND ')}`)
+    .bind(...params)
+    .first<{ count: number }>();
+
+  return row?.count ?? 0;
 }
 
 export async function getNextPost(lang: Lang, category: string, afterPubDate: Date): Promise<PostEntry | null> {
@@ -94,6 +119,37 @@ export async function getNextPost(lang: Lang, category: string, afterPubDate: Da
     .first<PostRow>();
 
   return row ? toEntry(row) : null;
+}
+
+export async function getPostsByTag(lang: Lang, tag: string): Promise<PostEntry[]> {
+  const { results } = await env.DB.prepare(`SELECT * FROM posts WHERE lang = ?1 AND draft = 0 ORDER BY pub_date DESC`)
+    .bind(lang)
+    .all<PostRow>();
+
+  return results.map(toEntry).filter((p) => p.data.tags.includes(tag));
+}
+
+export async function getRelatedPosts(
+  lang: Lang,
+  tags: string[],
+  excludeSlug: string,
+  limit = 4,
+): Promise<PostEntry[]> {
+  if (tags.length === 0) return [];
+
+  const { results } = await env.DB.prepare(
+    `SELECT * FROM posts WHERE lang = ?1 AND draft = 0 AND slug != ?2 ORDER BY pub_date DESC`,
+  )
+    .bind(lang, excludeSlug)
+    .all<PostRow>();
+
+  return results
+    .map(toEntry)
+    .map((post) => ({ post, overlap: post.data.tags.filter((t) => tags.includes(t)).length }))
+    .filter((x) => x.overlap > 0)
+    .sort((a, b) => b.overlap - a.overlap || b.post.data.pubDate.getTime() - a.post.data.pubDate.getTime())
+    .slice(0, limit)
+    .map((x) => x.post);
 }
 
 export async function searchPosts(lang: Lang, query: string): Promise<PostEntry[]> {

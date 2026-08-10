@@ -1,6 +1,5 @@
 ---
-import { listPosts, countPosts } from '../../lib/posts';
-import { getCategory } from '../../lib/categories';
+import { getPostsByTag } from '../../lib/posts';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostCard from '../../components/PostCard.astro';
 import Pagination from '../../components/Pagination.astro';
@@ -9,27 +8,22 @@ import { useTranslations } from '../../i18n/ui';
 
 const PAGE_SIZE = 10;
 
-const { category } = Astro.params;
-const meta = category ? await getCategory(category) : null;
+const { tag: rawTag } = Astro.params;
+const tag = rawTag ? decodeURIComponent(rawTag) : '';
 
-if (!meta) {
+if (!tag) {
   return Astro.rewrite('/404');
 }
 
 const t = useTranslations('ko');
+const allPosts = await getPostsByTag('ko', tag);
 const currentPage = Math.max(1, Number(Astro.url.searchParams.get('page') ?? '1') || 1);
-const total = await countPosts('ko', meta.id);
-const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-const posts = await listPosts({
-  lang: 'ko',
-  category: meta.id,
-  limit: PAGE_SIZE,
-  offset: (currentPage - 1) * PAGE_SIZE,
-});
+const totalPages = Math.max(1, Math.ceil(allPosts.length / PAGE_SIZE));
+const posts = allPosts.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 ---
 
-<BaseLayout title={meta.ko} description={SITE.description.ko} lang="ko" sidebar activeCategory={meta.id}>
-  <h1 class="page-title">{meta.ko}</h1>
+<BaseLayout title={`#${tag}`} description={SITE.description.ko} lang="ko">
+  <h1 class="page-title">#{tag}</h1>
   {posts.length === 0 ? (
     <p class="empty-state">{t('home.empty')}</p>
   ) : (
@@ -41,5 +35,5 @@ const posts = await listPosts({
       ))}
     </ul>
   )}
-  <Pagination currentPage={currentPage} totalPages={totalPages} baseHref={`/category/${meta.id}/`} />
+  <Pagination currentPage={currentPage} totalPages={totalPages} baseHref={`/tag/${encodeURIComponent(tag)}/`} />
 </BaseLayout>

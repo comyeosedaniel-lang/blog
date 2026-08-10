@@ -1,0 +1,63 @@
+---
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  baseHref: string;
+}
+
+const { currentPage, totalPages, baseHref } = Astro.props;
+const pageHref = (p: number) => (p <= 1 ? baseHref : `${baseHref}?page=${p}`);
+---
+
+{totalPages > 1 && (
+  <nav class="pagination" aria-label="Pagination">
+    {currentPage > 1 ? (
+      <a class="pagination__link" href={pageHref(currentPage - 1)} rel="prev">&larr;</a>
+    ) : (
+      <span class="pagination__link pagination__link--disabled">&larr;</span>
+    )}
+    <span class="pagination__status">{currentPage} / {totalPages}</span>
+    {currentPage < totalPages ? (
+      <a class="pagination__link" href={pageHref(currentPage + 1)} rel="next">&rarr;</a>
+    ) : (
+      <span class="pagination__link pagination__link--disabled">&rarr;</span>
+    )}
+  </nav>
+)}
+
+<style>
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    margin: 2.5rem 0 1rem;
+  }
+
+  .pagination__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .pagination__link:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .pagination__link--disabled {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  .pagination__status {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+</style>

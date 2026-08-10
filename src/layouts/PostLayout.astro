@@ -4,8 +4,10 @@ import { useTranslations, type Lang } from '../i18n/ui';
 import { estimateReadingTime } from '../lib/readingTime';
 import CategoryBadge from '../components/CategoryBadge.astro';
 import Comments from '../components/Comments.astro';
+import PostCard from '../components/PostCard.astro';
 import { SITE } from '../site.config';
-import { getNextPost, type PostEntry } from '../lib/posts';
+import { getNextPost, getRelatedPosts, type PostEntry } from '../lib/posts';
+import { getCategory } from '../lib/categories';
 import { runSeoCheck } from '../lib/seoCheck';
 
 interface Props {
@@ -30,6 +32,9 @@ const basePath = lang === 'en' ? '/en' : '';
 const nextPost = await getNextPost(lang, category, pubDate);
 const nextHref = nextPost ? `${basePath}/blog/${nextPost.slug}/` : null;
 
+const relatedPosts = await getRelatedPosts(lang, tags, entry.slug, 4);
+const categoryMeta = await getCategory(category);
+
 const seoChecks = runSeoCheck({
   title,
   description,
@@ -51,6 +56,25 @@ const structuredData = {
   inLanguage: lang,
   author: { '@type': 'Person', name: SITE.author },
   publisher: { '@type': 'Person', name: SITE.author },
+};
+
+const breadcrumbData = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: lang === 'en' ? 'Home' : '홈', item: `${SITE.url}${basePath}/` },
+    ...(categoryMeta
+      ? [
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: categoryMeta[lang],
+            item: `${SITE.url}${basePath}/category/${categoryMeta.id}/`,
+          },
+        ]
+      : []),
+    { '@type': 'ListItem', position: categoryMeta ? 3 : 2, name: title, item: postURL },
+  ],
 };
 ---
 
@@ -88,7 +112,7 @@ const structuredData = {
       {tags.length > 0 && (
         <div>
           {tags.map((tag) => (
-            <span class="tag">{tag}</span>
+            <a class="tag" href={`${basePath}/tag/${encodeURIComponent(tag)}/`}>{tag}</a>
           ))}
         </div>
       )}
@@ -98,11 +122,36 @@ const structuredData = {
       <slot />
     </div>
 
+    <div class="share-buttons" data-share-title={title} data-share-copied-text={t('share.copied')}>
+      <span class="share-buttons__label">{t('share.title')}</span>
+      <button type="button" class="share-buttons__btn" data-action="native" hidden>{t('share.native')}</button>
+      <a
+        class="share-buttons__btn"
+        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(postURL)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >X</a>
+      <button type="button" class="share-buttons__btn" data-action="copy">{t('share.copy')}</button>
+    </div>
+
     {nextPost && nextHref && (
       <a class="next-post" href={nextHref}>
         <span class="next-post__label">{t('post.next')}</span>
         <span class="next-post__title">{nextPost.data.title} &rarr;</span>
       </a>
+    )}
+
+    {relatedPosts.length > 0 && (
+      <section class="related-posts">
+        <h2 class="related-posts__title">{t('post.related')}</h2>
+        <ul class="post-list">
+          {relatedPosts.map((related) => (
+            <li>
+              <PostCard entry={related} lang={lang} />
+            </li>
+          ))}
+        </ul>
+      </section>
     )}
 
     {authed && (
@@ -128,10 +177,42 @@ const structuredData = {
   </article>
 </BaseLayout>
 
+<script type="application/ld+json" set:html={JSON.stringify(breadcrumbData)} is:inline />
+
 <script>
   document.querySelectorAll<HTMLImageElement>('.prose img').forEach((img) => {
     img.addEventListener('contextmenu', (e) => e.preventDefault());
     img.addEventListener('dragstart', (e) => e.preventDefault());
+    img.loading = 'lazy';
+    img.decoding = 'async';
+  });
+
+  document.querySelectorAll<HTMLElement>('.share-buttons').forEach((section) => {
+    const title = section.dataset.shareTitle ?? document.title;
+    const copiedText = section.dataset.shareCopiedText ?? '';
+    const url = window.location.href;
+
+    const nativeBtn = section.querySelector<HTMLButtonElement>('[data-action="native"]')!;
+    if (navigator.share) {
+      nativeBtn.hidden = false;
+      nativeBtn.addEventListener('click', () => {
+        navigator.share({ title, url }).catch(() => {});
+      });
+    }
+
+    const copyBtn = section.querySelector<HTMLButtonElement>('[data-action="copy"]')!;
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        const original = copyBtn.textContent;
+        copyBtn.textContent = copiedText;
+        setTimeout(() => {
+          copyBtn.textContent = original;
+        }, 2000);
+      } catch {
+        // clipboard API unavailable — nothing more we can do without a fallback UI
+      }
+    });
   });
 </script>
 
@@ -202,6 +283,48 @@ const structuredData = {
 
   .next-post:hover .next-post__title {
     color: var(--accent);
+  }
+
+  .share-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 2rem 0;
+  }
+
+  .share-buttons__label {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    margin-right: 0.25rem;
+  }
+
+  .share-buttons__btn {
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.35rem 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .share-buttons__btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .related-posts {
+    margin: 2.5rem 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .related-posts__title {
+    font-size: 1rem;
+    margin: 0 0 1rem;
   }
 
   .seo-check {

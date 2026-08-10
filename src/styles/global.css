@@ -317,6 +317,13 @@ main {
   border-radius: 999px;
   padding: 0.15rem 0.6rem;
   margin: 0 0.35rem 0.35rem 0;
+  text-decoration: none;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+a.tag:hover {
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 .category-badge {
