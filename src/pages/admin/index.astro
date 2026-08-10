@@ -1,13 +1,22 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import AdminNav from '../../components/AdminNav.astro';
+import Pagination from '../../components/Pagination.astro';
 import { SITE } from '../../site.config';
-import { listAllPostsForAdmin } from '../../lib/posts';
+import { listAllPostsForAdmin, countAllPostsForAdmin } from '../../lib/posts';
 import { listCategories } from '../../lib/categories';
 
 export const prerender = false;
 
-const [posts, categories] = await Promise.all([listAllPostsForAdmin(), listCategories()]);
+const PAGE_SIZE = 20;
+
+const currentPage = Math.max(1, Number(Astro.url.searchParams.get('page') ?? '1') || 1);
+const [posts, categories, total] = await Promise.all([
+  listAllPostsForAdmin(PAGE_SIZE, (currentPage - 1) * PAGE_SIZE),
+  listCategories(),
+  countAllPostsForAdmin(),
+]);
+const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 const categoryLabel = (id: string, lang: 'ko' | 'en') => categories.find((c) => c.id === id)?.[lang] ?? id;
 ---
 
@@ -34,6 +43,7 @@ const categoryLabel = (id: string, lang: 'ko' | 'en') => categories.find((c) => 
         ))}
       </ul>
     )}
+    <Pagination currentPage={currentPage} totalPages={totalPages} baseHref="/admin/" />
   </div>
 </BaseLayout>
 

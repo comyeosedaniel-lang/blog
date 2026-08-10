@@ -228,9 +228,21 @@ function toAdminFull(row: PostRow): AdminPostFull {
   };
 }
 
-export async function listAllPostsForAdmin(): Promise<AdminPostSummary[]> {
-  const { results } = await env.DB.prepare('SELECT * FROM posts ORDER BY pub_date DESC').all<PostRow>();
+export async function listAllPostsForAdmin(limit?: number, offset?: number): Promise<AdminPostSummary[]> {
+  let query = 'SELECT * FROM posts ORDER BY pub_date DESC';
+  if (limit) {
+    query += ` LIMIT ${Number(limit)}`;
+    if (offset) {
+      query += ` OFFSET ${Number(offset)}`;
+    }
+  }
+  const { results } = await env.DB.prepare(query).all<PostRow>();
   return results.map(toAdminSummary);
+}
+
+export async function countAllPostsForAdmin(): Promise<number> {
+  const row = await env.DB.prepare('SELECT COUNT(*) as count FROM posts').first<{ count: number }>();
+  return row?.count ?? 0;
 }
 
 export async function getPostById(id: number): Promise<AdminPostFull | null> {

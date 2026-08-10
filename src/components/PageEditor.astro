@@ -7,9 +7,20 @@ interface Props {
 
 const { page = null } = Astro.props;
 const isEdit = page !== null;
+
+function publicUrl(p: NonNullable<typeof page>): string {
+  const base = p.lang === 'en' ? '/en' : '';
+  if (p.slug === 'about') return `${base}/about/`;
+  return `${base}/page/${p.slug}/`;
+}
 ---
 
 <div class="write-editor" data-page-id={page?.id ?? ''}>
+  {isEdit && page.published && (
+    <p class="write-editor__view-link">
+      <a href={publicUrl(page)} target="_blank" rel="noopener noreferrer">{publicUrl(page)} ↗</a>
+    </p>
+  )}
   <div class="write-editor__row">
     <label class="write-field write-field--grow">
       <span>제목</span>
@@ -107,6 +118,19 @@ const isEdit = page !== null;
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
+  }
+
+  .write-editor__view-link {
+    margin: 0;
+    font-size: 0.8125rem;
+  }
+
+  .write-editor__view-link a {
+    color: var(--text-muted);
+  }
+
+  .write-editor__view-link a:hover {
+    color: var(--accent);
   }
 
   .write-field {

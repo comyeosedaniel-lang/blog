@@ -7,6 +7,12 @@ import { listAllPagesForAdmin } from '../../../lib/pages';
 export const prerender = false;
 
 const pages = await listAllPagesForAdmin();
+
+function publicUrl(p: { slug: string; lang: string }): string {
+  const base = p.lang === 'en' ? '/en' : '';
+  if (p.slug === 'about') return `${base}/about/`;
+  return `${base}/page/${p.slug}/`;
+}
 ---
 
 <BaseLayout title="페이지 관리" description={SITE.description.ko} lang="ko">
@@ -25,10 +31,19 @@ const pages = await listAllPagesForAdmin();
           <li class="write-list__item">
             <div class="write-list__meta">
               <span class="write-list__lang">{p.lang === 'ko' ? '한국어' : 'English'}</span>
-              {p.navLabel && <span class="write-list__draft">메뉴: {p.navLabel}</span>}
+              {p.navLabel ? (
+                <span class="write-list__draft">메뉴: {p.navLabel}</span>
+              ) : (
+                <span>메뉴에 없음 — 주소로만 접근</span>
+              )}
               {!p.published && <span class="write-list__draft">비공개</span>}
             </div>
             <a class="write-list__title" href={`/admin/pages/edit/${p.id}`}>{p.title}</a>
+            {p.published && (
+              <a class="write-list__url" href={publicUrl(p)} target="_blank" rel="noopener noreferrer">
+                {publicUrl(p)}
+              </a>
+            )}
           </li>
         ))}
       </ul>
@@ -103,6 +118,17 @@ const pages = await listAllPagesForAdmin();
   }
 
   .write-list__title:hover {
+    color: var(--accent);
+  }
+
+  .write-list__url {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+
+  .write-list__url:hover {
     color: var(--accent);
   }
 </style>
