@@ -105,20 +105,22 @@ const structuredData = {
       </a>
     )}
 
-    <section class="seo-check">
-      <h2 class="seo-check__title">SEO 점검 결과</h2>
-      <ul class="seo-check__list">
-        {seoChecks.map((item) => (
-          <li class={`seo-check__item seo-check__item--${item.pass ? 'pass' : 'fail'}`}>
-            <span class="seo-check__icon">{item.pass ? '✅' : '⚠'}</span>
-            <span>
-              <span class="seo-check__label">{item.label}</span>
-              {item.detail && <span class="seo-check__detail">{item.detail}</span>}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </section>
+    {authed && (
+      <section class="seo-check">
+        <h2 class="seo-check__title">SEO 점검 결과 (관리자에게만 보임)</h2>
+        <ul class="seo-check__list">
+          {seoChecks.map((item) => (
+            <li class={`seo-check__item seo-check__item--${item.pass ? 'pass' : 'fail'}`}>
+              <span class="seo-check__icon">{item.pass ? '✅' : '⚠'}</span>
+              <span>
+                <span class="seo-check__label">{item.label}</span>
+                {item.detail && <span class="seo-check__detail">{item.detail}</span>}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
 
     <Comments postId={entry.id} lang={lang} />
 
