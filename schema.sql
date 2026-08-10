@@ -25,6 +25,24 @@ CREATE TABLE IF NOT EXISTS admin (
   password_hash TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS pages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  slug TEXT NOT NULL,
+  lang TEXT NOT NULL DEFAULT 'ko',
+  title TEXT NOT NULL,
+  content_html TEXT NOT NULL,
+  content_json TEXT,
+  nav_label TEXT,
+  nav_order INTEGER NOT NULL DEFAULT 0,
+  published INTEGER NOT NULL DEFAULT 1,
+  updated_date TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+
+  UNIQUE (lang, slug)
+);
+
+CREATE INDEX IF NOT EXISTS idx_pages_lang_nav ON pages (lang, published, nav_order);
+
 CREATE TABLE IF NOT EXISTS login_attempts (
   ip TEXT PRIMARY KEY,
   count INTEGER NOT NULL DEFAULT 0,

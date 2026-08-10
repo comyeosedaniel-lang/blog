@@ -2,9 +2,11 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../site.config';
 import { listCategories } from '../lib/categories';
+import { getPageBySlug } from '../lib/pages';
 
 const title = '소개';
 const categories = await listCategories();
+const customIntro = await getPageBySlug('ko', 'about');
 ---
 
 <BaseLayout
@@ -16,10 +18,14 @@ const categories = await listCategories();
 >
   <h1 class="page-title">{title}</h1>
   <div class="prose">
-    <p>
-      <strong>{SITE.title}</strong>는 {SITE.description.ko} 개발하면서 배운 것, 읽은 책, 일상의
-      기록, 그리고 컴퓨터 관련 소식을 다룹니다.
-    </p>
+    {customIntro ? (
+      <Fragment set:html={customIntro.contentHtml} />
+    ) : (
+      <p>
+        <strong>{SITE.title}</strong>는 {SITE.description.ko} 개발하면서 배운 것, 읽은 책, 일상의
+        기록, 그리고 컴퓨터 관련 소식을 다룹니다.
+      </p>
+    )}
     <p>이런 이야기를 다뤄요.</p>
     <ul>
       {categories.map((c) => (

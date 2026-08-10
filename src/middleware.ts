@@ -8,6 +8,7 @@ const PROTECTED_API_PREFIXES = [
   '/api/categories',
   '/api/feed',
   '/api/comments',
+  '/api/pages',
 ];
 const PUBLIC_PATHS = new Set(['/admin/login', '/api/login', '/api/logout']);
 

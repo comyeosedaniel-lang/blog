@@ -1,0 +1,269 @@
+---
+import type { AdminPageFull } from '../lib/pages';
+
+interface Props {
+  page?: AdminPageFull | null;
+}
+
+const { page = null } = Astro.props;
+const isEdit = page !== null;
+---
+
+<div class="write-editor" data-page-id={page?.id ?? ''}>
+  <div class="write-editor__row">
+    <label class="write-field write-field--grow">
+      <span>제목</span>
+      <input type="text" id="title" value={page?.title ?? ''} placeholder="페이지 제목" />
+    </label>
+  </div>
+
+  <div class="write-editor__row">
+    <label class="write-field write-field--grow">
+      <span>주소(슬러그)</span>
+      <div class="write-field__inline">
+        <input type="text" id="slug" value={page?.slug ?? ''} disabled={isEdit} placeholder="contact" />
+        {!isEdit && (
+          <button type="button" id="slug-from-title" class="write-btn">제목에서 만들기</button>
+        )}
+      </div>
+    </label>
+
+    <label class="write-field">
+      <span>언어</span>
+      <select id="lang">
+        <option value="ko" selected={(page?.lang ?? 'ko') === 'ko'}>한국어</option>
+        <option value="en" selected={page?.lang === 'en'}>English</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="write-editor__row">
+    <label class="write-field write-field--grow">
+      <span>메뉴 이름 (비워두면 헤더 메뉴에 안 보여요)</span>
+      <input type="text" id="nav-label" value={page?.navLabel ?? ''} placeholder="예: 연락처" />
+    </label>
+
+    <label class="write-field">
+      <span>메뉴 순서</span>
+      <input type="number" id="nav-order" value={page?.navOrder ?? 0} />
+    </label>
+
+    <label class="write-field write-field--checkbox">
+      <span>공개</span>
+      <input type="checkbox" id="published" checked={page?.published ?? true} />
+    </label>
+  </div>
+
+  <div class="write-toolbar">
+    <button type="button" class="write-toolbar__btn" data-cmd="bold" title="굵게"><strong>B</strong></button>
+    <button type="button" class="write-toolbar__btn" data-cmd="italic" title="기울임"><em>I</em></button>
+    <button type="button" class="write-toolbar__btn" data-cmd="h2" title="제목 2">H2</button>
+    <button type="button" class="write-toolbar__btn" data-cmd="h3" title="제목 3">H3</button>
+    <button type="button" class="write-toolbar__btn" data-cmd="bullet" title="글머리 기호">•</button>
+    <button type="button" class="write-toolbar__btn" data-cmd="ordered" title="번호 매기기">1.</button>
+    <button type="button" class="write-toolbar__btn" data-cmd="blockquote" title="인용">"</button>
+    <button type="button" class="write-toolbar__btn" data-cmd="code" title="코드">{'<>'}</button>
+    <button type="button" class="write-toolbar__btn" data-cmd="link" title="링크">🔗</button>
+    <button type="button" class="write-toolbar__btn" data-cmd="image" title="이미지">🖼</button>
+    <button type="button" class="write-toolbar__btn" data-cmd="undo" title="실행 취소">↶</button>
+    <button type="button" class="write-toolbar__btn" data-cmd="redo" title="다시 실행">↷</button>
+  </div>
+  <input type="file" id="image-input" accept="image/*" hidden />
+
+  <div id="editor" class="write-prosemirror"></div>
+  <div id="preview-pane" class="prose write-preview" hidden></div>
+
+  <p id="autosave-banner" class="autosave-banner" hidden>
+    이전에 저장하지 못한 내용이 있어요.
+    <button type="button" id="autosave-restore" class="write-btn">불러오기</button>
+    <button type="button" id="autosave-discard" class="write-btn">무시하기</button>
+  </p>
+
+  <div class="write-editor__actions">
+    <button type="button" id="toggle-preview" class="write-btn">미리보기</button>
+    <button type="button" id="save-page" class="write-btn write-btn--primary">저장</button>
+    {isEdit && (
+      <button type="button" id="delete-page" class="write-btn write-btn--danger">삭제</button>
+    )}
+  </div>
+  <p id="write-status" class="write-editor__status" role="status"></p>
+</div>
+
+<script type="application/json" id="initial-data" set:html={JSON.stringify(page)} is:inline />
+
+<script>
+  import '../scripts/pageEditor.client';
+</script>
+
+<style>
+  .write-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-width: 44rem;
+  }
+
+  .write-editor__row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .write-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+
+  .write-field--grow {
+    flex: 1 1 16rem;
+  }
+
+  .write-field--checkbox {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .write-field__inline {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .write-field input[type='text'],
+  .write-field input[type='number'],
+  .write-field select {
+    font: inherit;
+    font-size: 0.9375rem;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.55rem 0.7rem;
+  }
+
+  .write-field input:disabled {
+    opacity: 0.6;
+  }
+
+  .write-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: var(--radius) var(--radius) 0 0;
+    background: var(--bg-elevated);
+  }
+
+  .write-toolbar__btn {
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 0.4rem;
+    font-size: 0.875rem;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 0.35rem;
+    cursor: pointer;
+  }
+
+  .write-toolbar__btn:hover,
+  .write-toolbar__btn.is-active {
+    border-color: var(--border);
+    background: var(--bg);
+  }
+
+  .write-prosemirror {
+    min-height: 16rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: 0 0 var(--radius) var(--radius);
+    background: var(--bg-elevated);
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+
+  .write-prosemirror :global(.ProseMirror) {
+    outline: none;
+    min-height: 16rem;
+  }
+
+  .write-prosemirror :global(p.is-editor-empty:first-child::before) {
+    content: attr(data-placeholder);
+    float: left;
+    color: var(--text-muted);
+    pointer-events: none;
+    height: 0;
+  }
+
+  .write-prosemirror :global(img) {
+    max-width: 100%;
+    border-radius: var(--radius);
+  }
+
+  .write-preview {
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elevated);
+  }
+
+  .autosave-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    color: var(--text);
+  }
+
+  .write-editor__actions {
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .write-btn {
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+  }
+
+  .write-btn--primary {
+    color: var(--accent-contrast);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .write-btn--danger {
+    color: #c0392b;
+    margin-left: auto;
+  }
+
+  .write-btn:hover {
+    opacity: 0.9;
+  }
+
+  .write-editor__status {
+    min-height: 1.2em;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  .write-editor__status--error {
+    font-weight: 700;
+    color: #c0392b;
+  }
+</style>

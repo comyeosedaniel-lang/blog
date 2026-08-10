@@ -1,6 +1,7 @@
 ---
 import { SITE } from '../site.config';
 import { useTranslations, type Lang } from '../i18n/ui';
+import { listNavPages } from '../lib/pages';
 import ThemeToggle from './ThemeToggle.astro';
 
 interface Props {
@@ -14,7 +15,9 @@ const t = useTranslations(lang);
 const home = lang === 'en' ? '/en/' : '/';
 const about = lang === 'en' ? '/en/about/' : '/about/';
 const langSwitch = lang === 'en' ? '/' : '/en/';
+const basePath = lang === 'en' ? '/en' : '';
 const authed = await Astro.session?.get('authed');
+const navPages = await listNavPages(lang);
 ---
 
 <header class="site-header">
@@ -25,6 +28,9 @@ const authed = await Astro.session?.get('authed');
     <nav class="site-nav" aria-label="Primary">
       <a href={home} aria-current={active === 'home' ? 'page' : undefined}>{t('nav.home')}</a>
       <a href={about} aria-current={active === 'about' ? 'page' : undefined}>{t('nav.about')}</a>
+      {navPages.map((p) => (
+        <a href={`${basePath}/page/${p.slug}/`}>{p.navLabel}</a>
+      ))}
       <a href={langSwitch} id="lang-switch" data-lang={lang === 'en' ? 'ko' : 'en'}>{t('nav.lang')}</a>
       {authed ? (
         <>

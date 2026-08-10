@@ -2,9 +2,11 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { SITE } from '../../site.config';
 import { listCategories } from '../../lib/categories';
+import { getPageBySlug } from '../../lib/pages';
 
 const title = 'About';
 const categories = await listCategories();
+const customIntro = await getPageBySlug('en', 'about');
 ---
 
 <BaseLayout
@@ -16,10 +18,14 @@ const categories = await listCategories();
 >
   <h1 class="page-title">{title}</h1>
   <div class="prose">
-    <p>
-      <strong>{SITE.title}</strong> is a space for {SITE.description.en} things learned while
-      building software, notes on books, everyday life, and computer-related news.
-    </p>
+    {customIntro ? (
+      <Fragment set:html={customIntro.contentHtml} />
+    ) : (
+      <p>
+        <strong>{SITE.title}</strong> is a space for {SITE.description.en} things learned while
+        building software, notes on books, everyday life, and computer-related news.
+      </p>
+    )}
     <p>Here's what you'll find here.</p>
     <ul>
       {categories.map((c) => (

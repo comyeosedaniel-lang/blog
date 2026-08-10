@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import PageEditor from '../../../../components/PageEditor.astro';
+import AdminNav from '../../../../components/AdminNav.astro';
+import { SITE } from '../../../../site.config';
+import { getPageById } from '../../../../lib/pages';
+
+export const prerender = false;
+
+const id = Number(Astro.params.id);
+const page = Number.isInteger(id) ? await getPageById(id) : null;
+
+if (!page) {
+  return Astro.rewrite('/404');
+}
+---
+
+<BaseLayout title={`페이지 편집: ${page.title}`} description={SITE.description.ko} lang="ko">
+  <AdminNav active="pages" />
+  <h1 class="page-title">페이지 편집</h1>
+  <PageEditor page={page} />
+</BaseLayout>

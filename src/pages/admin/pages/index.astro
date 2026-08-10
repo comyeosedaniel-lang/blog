@@ -1,0 +1,108 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import AdminNav from '../../../components/AdminNav.astro';
+import { SITE } from '../../../site.config';
+import { listAllPagesForAdmin } from '../../../lib/pages';
+
+export const prerender = false;
+
+const pages = await listAllPagesForAdmin();
+---
+
+<BaseLayout title="페이지 관리" description={SITE.description.ko} lang="ko">
+  <AdminNav active="pages" />
+  <div class="write-dashboard">
+    <div class="write-dashboard__head">
+      <h1 class="page-title">페이지 관리</h1>
+      <a href="/admin/pages/new" class="write-btn write-btn--primary">새 페이지</a>
+    </div>
+
+    {pages.length === 0 ? (
+      <p class="empty-state">아직 만든 페이지가 없어요.</p>
+    ) : (
+      <ul class="write-list">
+        {pages.map((p) => (
+          <li class="write-list__item">
+            <div class="write-list__meta">
+              <span class="write-list__lang">{p.lang === 'ko' ? '한국어' : 'English'}</span>
+              {p.navLabel && <span class="write-list__draft">메뉴: {p.navLabel}</span>}
+              {!p.published && <span class="write-list__draft">비공개</span>}
+            </div>
+            <a class="write-list__title" href={`/admin/pages/edit/${p.id}`}>{p.title}</a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .write-dashboard__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .write-dashboard__head .page-title {
+    margin: 0;
+  }
+
+  .write-btn {
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-block;
+  }
+
+  .write-btn--primary {
+    color: var(--accent-contrast);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .write-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .write-list__item {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .write-list__meta {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .write-list__draft {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .write-list__title {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .write-list__title:hover {
+    color: var(--accent);
+  }
+</style>
