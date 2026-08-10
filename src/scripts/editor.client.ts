@@ -79,6 +79,26 @@ if (root) {
     e.returnValue = '';
   });
 
+  // --- Autosave (local only — protects against crashed tabs/browsers) ---
+  let autosaveKey = `blog-draft-autosave:${postId ?? 'new'}`;
+  let autosaveTimer: number | undefined;
+
+  function scheduleAutosave() {
+    window.clearTimeout(autosaveTimer);
+    autosaveTimer = window.setTimeout(() => {
+      try {
+        localStorage.setItem(autosaveKey, JSON.stringify({ ...currentFormValues(), savedAt: Date.now() }));
+      } catch {
+        // localStorage unavailable (private mode, quota) — autosave is best-effort
+      }
+    }, 2000);
+  }
+
+  editor.on('update', scheduleAutosave);
+  ['title', 'slug', 'lang', 'category', 'description', 'tags'].forEach((id) => {
+    document.getElementById(id)?.addEventListener('input', scheduleAutosave);
+  });
+
   function slugify(str: string): string {
     return str
       .trim()
@@ -233,10 +253,62 @@ if (root) {
     }
   });
 
+  // --- Autosave restore banner ---
+  const autosaveBanner = document.getElementById('autosave-banner')!;
+  try {
+    const raw = localStorage.getItem(autosaveKey);
+    const saved = raw ? JSON.parse(raw) : null;
+    if (saved) {
+      autosaveBanner.hidden = false;
+      document.getElementById('autosave-restore')?.addEventListener('click', () => {
+        (document.getElementById('title') as HTMLInputElement).value = saved.title ?? '';
+        const slugField = document.getElementById('slug') as HTMLInputElement;
+        if (!slugField.disabled) slugField.value = saved.slug ?? '';
+        (document.getElementById('description') as HTMLTextAreaElement).value = saved.description ?? '';
+        (document.getElementById('tags') as HTMLInputElement).value = (saved.tags ?? []).join(', ');
+        if (saved.contentJson) {
+          editor.commands.setContent(JSON.parse(saved.contentJson));
+        } else if (saved.contentHtml) {
+          editor.commands.setContent(saved.contentHtml);
+        }
+        markDirty();
+        autosaveBanner.hidden = true;
+      });
+      document.getElementById('autosave-discard')?.addEventListener('click', () => {
+        localStorage.removeItem(autosaveKey);
+        autosaveBanner.hidden = true;
+      });
+    }
+  } catch {
+    // localStorage unavailable — nothing to restore
+  }
+
   // --- Slug auto-generate (new posts only) ---
   document.getElementById('slug-from-title')?.addEventListener('click', () => {
     const title = (document.getElementById('title') as HTMLInputElement).value;
     (document.getElementById('slug') as HTMLInputElement).value = slugify(title);
+  });
+
+  // --- Preview toggle ---
+  const previewPane = document.getElementById('preview-pane')!;
+  const previewToggle = document.getElementById('toggle-preview') as HTMLButtonElement;
+  const writeToolbar = document.querySelector<HTMLElement>('.write-toolbar');
+  let previewing = false;
+
+  previewToggle.addEventListener('click', () => {
+    previewing = !previewing;
+    if (previewing) {
+      previewPane.innerHTML = editor.getHTML();
+      previewPane.hidden = false;
+      editorEl.hidden = true;
+      writeToolbar?.setAttribute('hidden', '');
+      previewToggle.textContent = '편집으로 돌아가기';
+    } else {
+      previewPane.hidden = true;
+      editorEl.hidden = false;
+      writeToolbar?.removeAttribute('hidden');
+      previewToggle.textContent = '미리보기';
+    }
   });
 
   // --- SEO check ---
@@ -309,6 +381,12 @@ if (root) {
       }
 
       isDirty = false;
+      try {
+        localStorage.removeItem(autosaveKey);
+      } catch {
+        // ignore
+      }
+      autosaveKey = `blog-draft-autosave:${postId ?? 'new'}`;
       setStatus(draft ? '임시저장했어요.' : '발행했어요.');
       renderSeoCheck(runSeoCheck(payload));
     } catch {
@@ -331,6 +409,11 @@ if (root) {
     const res = await fetch(`/api/posts/${postId}`, { method: 'DELETE' });
     if (res.ok) {
       isDirty = false;
+      try {
+        localStorage.removeItem(autosaveKey);
+      } catch {
+        // ignore
+      }
       window.location.href = '/admin';
     } else {
       setStatus('삭제에 실패했어요.', true);

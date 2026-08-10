@@ -89,8 +89,16 @@ const categories = await listCategories();
   <input type="file" id="image-input" accept="image/*" hidden />
 
   <div id="editor" class="write-prosemirror"></div>
+  <div id="preview-pane" class="prose write-preview" hidden></div>
+
+  <p id="autosave-banner" class="autosave-banner" hidden>
+    이전에 저장하지 못한 내용이 있어요.
+    <button type="button" id="autosave-restore" class="write-btn">불러오기</button>
+    <button type="button" id="autosave-discard" class="write-btn">무시하기</button>
+  </p>
 
   <div class="write-editor__actions">
+    <button type="button" id="toggle-preview" class="write-btn">미리보기</button>
     <button type="button" id="save-draft" class="write-btn">임시저장</button>
     <button type="button" id="publish" class="write-btn write-btn--primary">발행</button>
     {isEdit && (
@@ -220,6 +228,25 @@ const categories = await listCategories();
   .write-prosemirror :global(img) {
     max-width: 100%;
     border-radius: var(--radius);
+  }
+
+  .write-preview {
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elevated);
+  }
+
+  .autosave-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    color: var(--text);
   }
 
   .write-editor__actions {
