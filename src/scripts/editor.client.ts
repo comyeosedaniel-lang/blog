@@ -24,9 +24,25 @@ if (root) {
   const statusEl = document.getElementById('write-status')!;
 
   const sourceLink = root.dataset.sourceLink;
-  const initialContent = initial?.contentJson
-    ? JSON.parse(initial.contentJson)
-    : (initial?.contentHtml ?? (sourceLink ? `<p>출처: <a href="${sourceLink}">${sourceLink}</a></p><p></p>` : ''));
+
+  function isEmptyDoc(json: unknown): boolean {
+    if (!json || typeof json !== 'object') return true;
+    const content = (json as { content?: unknown[] }).content;
+    if (!Array.isArray(content) || content.length === 0) return true;
+    if (content.length === 1) {
+      const node = content[0] as { type?: string; content?: unknown };
+      if (node?.type === 'paragraph' && !node.content) return true;
+    }
+    return false;
+  }
+
+  let initialContent: string | object = initial?.contentHtml ?? (sourceLink ? `<p>출처: <a href="${sourceLink}">${sourceLink}</a></p><p></p>` : '');
+  if (initial?.contentJson) {
+    const parsedJson = JSON.parse(initial.contentJson);
+    if (!isEmptyDoc(parsedJson) || !initial.contentHtml) {
+      initialContent = parsedJson;
+    }
+  }
 
   const editor = new Editor({
     element: editorEl,
