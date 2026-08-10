@@ -18,7 +18,7 @@ const root = document.querySelector<HTMLElement>('.write-editor');
 if (root) {
   const initialDataEl = document.getElementById('initial-data');
   const initial: InitialPost | null = initialDataEl?.textContent ? JSON.parse(initialDataEl.textContent) : null;
-  const postId = initial?.id ?? null;
+  let postId = initial?.id ?? null;
 
   const editorEl = document.getElementById('editor')!;
   const statusEl = document.getElementById('write-status')!;
@@ -238,6 +238,93 @@ if (root) {
     (document.getElementById('slug') as HTMLInputElement).value = slugify(title);
   });
 
+  // --- SEO check ---
+  interface SeoCheckItem {
+    label: string;
+    pass: boolean;
+    detail?: string;
+  }
+
+  interface SeoPayload {
+    title: string;
+    description: string;
+    slug: string;
+    tags: string[];
+    heroImageUrl: string | null;
+    contentHtml: string;
+  }
+
+  function runSeoCheck(payload: SeoPayload): SeoCheckItem[] {
+    const titleLen = payload.title.length;
+    const descLen = payload.description.length;
+    const slugOk = /^[a-z0-9]+(-[a-z0-9]+)*$/.test(payload.slug) && payload.slug.length <= 75;
+    const plainText = payload.contentHtml
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const bodyLen = plainText.length;
+    const hasHeading = /<h[23][ >]/i.test(payload.contentHtml);
+    const imgTags = payload.contentHtml.match(/<img [^>]*>/gi) ?? [];
+    const missingAlt = imgTags.filter((tag) => !/\balt="[^"]+"/.test(tag));
+
+    return [
+      {
+        label: '제목 길이',
+        pass: titleLen >= 10 && titleLen <= 60,
+        detail: `${titleLen}자 (권장: 10~60자)`,
+      },
+      {
+        label: '설명(메타) 길이',
+        pass: descLen >= 50 && descLen <= 160,
+        detail: descLen === 0 ? '설명이 비어 있어요.' : `${descLen}자 (권장: 50~160자)`,
+      },
+      {
+        label: '주소(슬러그) 형식',
+        pass: slugOk,
+        detail: slugOk ? undefined : '영문 소문자·숫자·하이픈만 사용하고 75자 이하로 만들어주세요.',
+      },
+      {
+        label: '본문 분량',
+        pass: bodyLen >= 200,
+        detail: `${bodyLen}자 (최소 200자 권장)`,
+      },
+      {
+        label: '소제목(H2/H3) 사용',
+        pass: bodyLen < 200 || hasHeading,
+        detail: hasHeading ? undefined : '본문에 소제목을 추가하면 검색엔진이 구조를 더 잘 이해해요.',
+      },
+      {
+        label: '이미지 대체 텍스트(alt)',
+        pass: missingAlt.length === 0,
+        detail: missingAlt.length ? `${missingAlt.length}개 이미지에 대체 텍스트가 없어요.` : undefined,
+      },
+      {
+        label: '태그',
+        pass: payload.tags.length > 0,
+        detail: payload.tags.length ? undefined : '태그를 1개 이상 추가해주세요.',
+      },
+      {
+        label: '대표 이미지',
+        pass: Boolean(payload.heroImageUrl),
+        detail: payload.heroImageUrl ? undefined : '공유 시 노출될 대표 이미지를 등록하면 좋아요.',
+      },
+    ];
+  }
+
+  function renderSeoCheck(items: SeoCheckItem[]) {
+    const container = document.getElementById('seo-check')!;
+    const list = document.getElementById('seo-check-list')!;
+    list.innerHTML = '';
+    for (const item of items) {
+      const li = document.createElement('li');
+      li.className = `seo-check__item seo-check__item--${item.pass ? 'pass' : 'fail'}`;
+      const detailHtml = item.detail ? `<span class="seo-check__detail">${item.detail}</span>` : '';
+      li.innerHTML = `<span class="seo-check__icon">${item.pass ? '✅' : '⚠'}</span><span><span class="seo-check__label">${item.label}</span>${detailHtml}</span>`;
+      list.appendChild(li);
+    }
+    container.hidden = false;
+  }
+
   // --- Save / publish ---
   async function save(draft: boolean) {
     const slug = (document.getElementById('slug') as HTMLInputElement).value.trim();
@@ -280,8 +367,19 @@ if (root) {
         setStatus(`저장 실패: ${err.error ?? res.status}`, true);
         return;
       }
+
+      if (!postId) {
+        const data = (await res.json().catch(() => ({}))) as { id?: number };
+        if (data.id) {
+          postId = data.id;
+          (document.getElementById('slug') as HTMLInputElement).disabled = true;
+          window.history.replaceState(null, '', `/admin/edit/${data.id}`);
+        }
+      }
+
       isDirty = false;
-      window.location.href = '/admin';
+      setStatus(draft ? '임시저장했어요.' : '발행했어요.');
+      renderSeoCheck(runSeoCheck(payload));
     } catch {
       setStatus('저장 중 문제가 생겼어요. 네트워크 연결을 확인해주세요.', true);
     }

@@ -98,6 +98,11 @@ const categories = await listCategories();
     )}
   </div>
   <p id="write-status" class="write-editor__status" role="status"></p>
+
+  <div id="seo-check" class="seo-check" hidden>
+    <h2 class="seo-check__title">SEO 점검 결과</h2>
+    <ul id="seo-check-list" class="seo-check__list"></ul>
+  </div>
 </div>
 
 <script type="application/json" id="initial-data" set:html={JSON.stringify(post)} is:inline />
@@ -258,5 +263,56 @@ const categories = await listCategories();
   .write-editor__status--error {
     font-weight: 700;
     color: #c0392b;
+  }
+
+  .seo-check {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem;
+    background: var(--bg-elevated);
+  }
+
+  .seo-check__title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+  }
+
+  .seo-check__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .seo-check__item {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .seo-check__icon {
+    flex: none;
+  }
+
+  .seo-check__item--pass .seo-check__icon {
+    color: #2e7d32;
+  }
+
+  .seo-check__item--fail .seo-check__icon {
+    color: #c0392b;
+  }
+
+  .seo-check__item--fail .seo-check__label {
+    font-weight: 600;
+  }
+
+  .seo-check__detail {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.8125rem;
   }
 </style>
