@@ -45,12 +45,15 @@ CREATE INDEX IF NOT EXISTS idx_pages_lang_nav ON pages (lang, published, nav_ord
 
 CREATE TABLE IF NOT EXISTS attachments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
   slug TEXT NOT NULL UNIQUE,
   label TEXT NOT NULL,
   size INTEGER NOT NULL,
   content_type TEXT,
   uploaded_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE INDEX IF NOT EXISTS idx_attachments_post_id ON attachments (post_id);
 
 CREATE TABLE IF NOT EXISTS login_attempts (
   ip TEXT PRIMARY KEY,

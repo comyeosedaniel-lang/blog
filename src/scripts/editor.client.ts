@@ -419,4 +419,75 @@ if (root) {
       setStatus('삭제에 실패했어요.', true);
     }
   });
+
+  // --- Per-post attachments ---
+  const attachmentsList = document.getElementById('attachments-list');
+  const attachmentStatus = document.getElementById('attachment-status');
+
+  function formatAttachmentSize(bytes: number): string {
+    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)}KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+  }
+
+  document.getElementById('attachment-upload-btn')?.addEventListener('click', async () => {
+    if (!postId || !attachmentsList || !attachmentStatus) return;
+
+    const labelField = document.getElementById('attachment-label') as HTMLInputElement;
+    const fileField = document.getElementById('attachment-file') as HTMLInputElement;
+    const file = fileField.files?.[0];
+
+    if (!file) {
+      attachmentStatus.textContent = '⚠ 파일을 선택해주세요.';
+      return;
+    }
+
+    const form = new FormData();
+    form.append('file', file);
+    form.append('label', labelField.value.trim() || file.name);
+    form.append('postId', String(postId));
+
+    attachmentStatus.textContent = '업로드하는 중...';
+    try {
+      const res = await fetch('/api/attachments', { method: 'POST', body: form });
+      const data = (await res.json().catch(() => ({}))) as {
+        id?: number;
+        label?: string;
+        url?: string;
+        size?: number;
+        error?: string;
+      };
+      if (!res.ok || !data.id) {
+        attachmentStatus.textContent = `⚠ ${data.error ?? '업로드에 실패했어요.'}`;
+        return;
+      }
+
+      const li = document.createElement('li');
+      li.className = 'attachments-list__row';
+      li.dataset.id = String(data.id);
+      li.innerHTML = `<a href="${data.url}" target="_blank" rel="noopener noreferrer">${data.label}</a><span class="attachments-list__meta">${formatAttachmentSize(data.size ?? 0)}</span><button type="button" class="attachments-list__delete">삭제</button>`;
+      attachmentsList.appendChild(li);
+
+      labelField.value = '';
+      fileField.value = '';
+      attachmentStatus.textContent = '추가했어요.';
+    } catch {
+      attachmentStatus.textContent = '⚠ 업로드 중 문제가 생겼어요.';
+    }
+  });
+
+  attachmentsList?.addEventListener('click', async (e) => {
+    const target = e.target as HTMLElement;
+    if (!target.classList.contains('attachments-list__delete')) return;
+
+    const row = target.closest<HTMLLIElement>('.attachments-list__row')!;
+    const id = row.dataset.id;
+    if (!window.confirm('이 첨부파일을 삭제할까요? 글에서 다운로드 버튼이 사라져요.')) return;
+
+    const res = await fetch(`/api/attachments/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      row.remove();
+    } else if (attachmentStatus) {
+      attachmentStatus.textContent = '⚠ 삭제에 실패했어요.';
+    }
+  });
 }

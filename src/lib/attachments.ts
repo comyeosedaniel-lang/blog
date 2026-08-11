@@ -3,6 +3,7 @@ import { UPLOADS_PUBLIC_URL } from '../site.config';
 
 export interface Attachment {
   id: number;
+  postId: number | null;
   slug: string;
   label: string;
   size: number;
@@ -13,6 +14,7 @@ export interface Attachment {
 
 interface AttachmentRow {
   id: number;
+  post_id: number | null;
   slug: string;
   label: string;
   size: number;
@@ -25,6 +27,7 @@ const R2_PREFIX = 'attachments/';
 function toAttachment(row: AttachmentRow): Attachment {
   return {
     id: row.id,
+    postId: row.post_id,
     slug: row.slug,
     label: row.label,
     size: row.size,
@@ -36,6 +39,13 @@ function toAttachment(row: AttachmentRow): Attachment {
 
 export async function listAttachments(): Promise<Attachment[]> {
   const { results } = await env.DB.prepare('SELECT * FROM attachments ORDER BY uploaded_at DESC').all<AttachmentRow>();
+  return results.map(toAttachment);
+}
+
+export async function listAttachmentsForPost(postId: number): Promise<Attachment[]> {
+  const { results } = await env.DB.prepare('SELECT * FROM attachments WHERE post_id = ?1 ORDER BY uploaded_at ASC')
+    .bind(postId)
+    .all<AttachmentRow>();
   return results.map(toAttachment);
 }
 
@@ -59,16 +69,17 @@ export async function createAttachment(
   slug: string,
   label: string,
   file: File,
+  postId: number | null = null,
 ): Promise<Attachment> {
   await env.UPLOADS.put(`${R2_PREFIX}${slug}`, await file.arrayBuffer(), {
     httpMetadata: { contentType: file.type || 'application/octet-stream' },
   });
 
   const row = await env.DB.prepare(
-    `INSERT INTO attachments (slug, label, size, content_type, uploaded_at)
-     VALUES (?1, ?2, ?3, ?4, datetime('now')) RETURNING *`,
+    `INSERT INTO attachments (post_id, slug, label, size, content_type, uploaded_at)
+     VALUES (?1, ?2, ?3, ?4, ?5, datetime('now')) RETURNING *`,
   )
-    .bind(slug, label, file.size, file.type || null)
+    .bind(postId, slug, label, file.size, file.type || null)
     .first<AttachmentRow>();
 
   return toAttachment(row!);

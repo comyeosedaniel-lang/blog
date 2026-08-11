@@ -1,16 +1,23 @@
 ---
 import { listCategories } from '../lib/categories';
 import type { AdminPostFull } from '../lib/posts';
+import type { Attachment } from '../lib/attachments';
 
 interface Props {
   post?: AdminPostFull | null;
   initialTitle?: string;
   initialSourceLink?: string;
+  attachments?: Attachment[];
 }
 
-const { post = null, initialTitle = '', initialSourceLink = '' } = Astro.props;
+const { post = null, initialTitle = '', initialSourceLink = '', attachments = [] } = Astro.props;
 const isEdit = post !== null;
 const categories = await listCategories();
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)}KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+}
 ---
 
 <div
@@ -71,6 +78,31 @@ const categories = await listCategories();
     <img id="hero-preview" src={post?.heroImageUrl ?? ''} hidden={!post?.heroImageUrl} alt="" />
     <input type="hidden" id="heroImageUrl" value={post?.heroImageUrl ?? ''} />
   </label>
+
+  <div class="write-field">
+    <span>첨부파일 (글 안에 다운로드 버튼으로 자동 표시돼요)</span>
+    {isEdit ? (
+      <>
+        <ul id="attachments-list" class="attachments-list">
+          {attachments.map((a) => (
+            <li class="attachments-list__row" data-id={a.id}>
+              <a href={a.url} target="_blank" rel="noopener noreferrer">{a.label}</a>
+              <span class="attachments-list__meta">{formatSize(a.size)}</span>
+              <button type="button" class="attachments-list__delete">삭제</button>
+            </li>
+          ))}
+        </ul>
+        <div class="attachments-add">
+          <input type="text" id="attachment-label" placeholder="이름 (예: 설치 파일)" />
+          <input type="file" id="attachment-file" />
+          <button type="button" id="attachment-upload-btn" class="write-btn">추가</button>
+        </div>
+        <p id="attachment-status" class="write-editor__status" role="status"></p>
+      </>
+    ) : (
+      <p class="write-editor__hint">글을 먼저 저장한 후 첨부파일을 추가할 수 있어요.</p>
+    )}
+  </div>
 
   <div class="write-toolbar">
     <button type="button" class="write-toolbar__btn" data-cmd="bold" title="굵게"><strong>B</strong></button>
@@ -171,6 +203,68 @@ const categories = await listCategories();
     max-width: 16rem;
     margin-top: 0.5rem;
     border-radius: var(--radius);
+  }
+
+  .write-editor__hint {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  .attachments-list {
+    list-style: none;
+    margin: 0 0 0.6rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .attachments-list__row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+  }
+
+  .attachments-list__row a {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .attachments-list__meta {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+  }
+
+  .attachments-list__delete {
+    margin-left: auto;
+    font: inherit;
+    font-size: 0.75rem;
+    color: #c0392b;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .attachments-add {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .attachments-add input[type='text'] {
+    flex: 1 1 12rem;
+    font: inherit;
+    font-size: 0.9375rem;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.7rem;
   }
 
   .write-toolbar {

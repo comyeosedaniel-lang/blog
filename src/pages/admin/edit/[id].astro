@@ -4,6 +4,7 @@ import WriteEditor from '../../../components/WriteEditor.astro';
 import AdminNav from '../../../components/AdminNav.astro';
 import { SITE } from '../../../site.config';
 import { getPostById } from '../../../lib/posts';
+import { listAttachmentsForPost } from '../../../lib/attachments';
 
 export const prerender = false;
 
@@ -13,10 +14,12 @@ const post = Number.isInteger(id) ? await getPostById(id) : null;
 if (!post) {
   return Astro.rewrite('/404');
 }
+
+const attachments = await listAttachmentsForPost(post.id);
 ---
 
 <BaseLayout title={`편집: ${post.title}`} description={SITE.description.ko} lang="ko">
   <AdminNav />
   <h1 class="page-title">글 편집</h1>
-  <WriteEditor post={post} />
+  <WriteEditor post={post} attachments={attachments} />
 </BaseLayout>

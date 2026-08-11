@@ -8,11 +8,17 @@ import PostCard from '../components/PostCard.astro';
 import { SITE } from '../site.config';
 import { getNextPost, getRelatedPosts, type PostEntry } from '../lib/posts';
 import { getCategory } from '../lib/categories';
+import { listAttachmentsForPost } from '../lib/attachments';
 import { runSeoCheck } from '../lib/seoCheck';
 
 interface Props {
   entry: PostEntry;
   lang: Lang;
+}
+
+function formatAttachmentSize(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)}KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 }
 
 const { entry, lang } = Astro.props;
@@ -34,6 +40,7 @@ const nextHref = nextPost ? `${basePath}/blog/${nextPost.slug}/` : null;
 
 const relatedPosts = await getRelatedPosts(lang, tags, entry.slug, 4);
 const categoryMeta = await getCategory(category);
+const attachments = await listAttachmentsForPost(entry.dbId);
 
 const seoChecks = runSeoCheck({
   title,
@@ -121,6 +128,17 @@ const breadcrumbData = {
     <div class="prose">
       <slot />
     </div>
+
+    {attachments.length > 0 && (
+      <div class="attachments-block">
+        {attachments.map((a) => (
+          <a class="download-btn" href={a.url} download>
+            {a.label}
+            <span class="download-btn__meta">{formatAttachmentSize(a.size)}</span>
+          </a>
+        ))}
+      </div>
+    )}
 
     <div class="share-buttons" data-share-title={title} data-share-copied-text={t('share.copied')}>
       <span class="share-buttons__label">{t('share.title')}</span>
