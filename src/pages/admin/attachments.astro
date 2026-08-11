@@ -1,0 +1,305 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdminNav from '../../components/AdminNav.astro';
+import { SITE } from '../../site.config';
+import { listAttachments } from '../../lib/attachments';
+
+export const prerender = false;
+
+const attachments = await listAttachments();
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)}KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+}
+
+function formatDate(d: Date): string {
+  return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+---
+
+<BaseLayout title="첨부파일 관리" description={SITE.description.ko} lang="ko">
+  <AdminNav active="attachments" />
+  <div class="attachments-admin">
+    <h1 class="page-title">첨부파일 관리</h1>
+    <p class="attachments-admin__hint">
+      여기서 올린 파일의 주소는 항상 고정돼요. "파일 교체"로 내용을 바꿔도 글에 넣어둔 링크는
+      그대로 유지됩니다.
+    </p>
+
+    <form id="upload-form" class="attachments-admin__upload">
+      <label class="write-field write-field--grow">
+        <span>이름</span>
+        <input type="text" id="upload-label" placeholder="예: RustDesk 맞춤 버전" required />
+      </label>
+      <label class="write-field write-field--grow">
+        <span>파일</span>
+        <input type="file" id="upload-file" required />
+      </label>
+      <label class="write-field write-field--grow">
+        <span>주소 (비워두면 파일명 사용)</span>
+        <input type="text" id="upload-slug" placeholder="rustdesk.zip" />
+      </label>
+      <button type="submit" class="write-btn write-btn--primary">업로드</button>
+    </form>
+    <p id="upload-status" class="attachments-admin__status" role="status"></p>
+
+    {attachments.length === 0 ? (
+      <p class="empty-state">아직 올린 첨부파일이 없어요.</p>
+    ) : (
+      <ul class="attachments-admin__list" id="attachments-list">
+        {attachments.map((a) => (
+          <li class="attachments-admin__row" data-id={a.id}>
+            <div class="attachments-admin__head">
+              <strong>{a.label}</strong>
+              <span class="attachments-admin__meta">{formatSize(a.size)} · {formatDate(a.uploadedAt)}</span>
+            </div>
+            <div class="attachments-admin__actions">
+              <input type="text" class="attachments-admin__url" value={a.url} readonly />
+              <button type="button" class="write-btn copy-btn">링크 복사</button>
+              <label class="write-btn replace-label">
+                파일 교체
+                <input type="file" class="replace-input" hidden />
+              </label>
+              <button type="button" class="write-btn write-btn--danger delete-btn">삭제</button>
+            </div>
+            <p class="attachments-admin__row-status" role="status"></p>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</BaseLayout>
+
+<script>
+  const uploadForm = document.getElementById('upload-form') as HTMLFormElement;
+  const uploadStatus = document.getElementById('upload-status')!;
+  const list = document.getElementById('attachments-list');
+
+  uploadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const label = (document.getElementById('upload-label') as HTMLInputElement).value.trim();
+    const file = (document.getElementById('upload-file') as HTMLInputElement).files?.[0];
+    const slug = (document.getElementById('upload-slug') as HTMLInputElement).value.trim();
+
+    if (!file) return;
+
+    const form = new FormData();
+    form.append('file', file);
+    form.append('label', label);
+    if (slug) form.append('slug', slug);
+
+    uploadStatus.textContent = '업로드하는 중...';
+    try {
+      const res = await fetch('/api/attachments', { method: 'POST', body: form });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        uploadStatus.textContent = `⚠ ${data.error ?? '업로드에 실패했어요.'}`;
+        return;
+      }
+      window.location.reload();
+    } catch {
+      uploadStatus.textContent = '⚠ 업로드 중 문제가 생겼어요.';
+    }
+  });
+
+  list?.addEventListener('click', async (e) => {
+    const target = e.target as HTMLElement;
+    const row = target.closest<HTMLLIElement>('.attachments-admin__row');
+    if (!row) return;
+    const id = row.dataset.id!;
+    const rowStatus = row.querySelector<HTMLParagraphElement>('.attachments-admin__row-status')!;
+
+    if (target.classList.contains('copy-btn')) {
+      const url = row.querySelector<HTMLInputElement>('.attachments-admin__url')!.value;
+      try {
+        await navigator.clipboard.writeText(url);
+        rowStatus.textContent = '링크를 복사했어요.';
+        setTimeout(() => (rowStatus.textContent = ''), 2000);
+      } catch {
+        rowStatus.textContent = '⚠ 복사에 실패했어요.';
+      }
+    }
+
+    if (target.classList.contains('delete-btn')) {
+      if (!window.confirm('이 첨부파일을 삭제할까요? 글에서 이 링크를 쓰고 있다면 다운로드가 끊겨요.')) return;
+      rowStatus.textContent = '삭제하는 중...';
+      const res = await fetch(`/api/attachments/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        row.remove();
+      } else {
+        rowStatus.textContent = '⚠ 삭제에 실패했어요.';
+      }
+    }
+  });
+
+  list?.addEventListener('change', async (e) => {
+    const target = e.target as HTMLInputElement;
+    if (!target.classList.contains('replace-input')) return;
+
+    const row = target.closest<HTMLLIElement>('.attachments-admin__row')!;
+    const id = row.dataset.id!;
+    const rowStatus = row.querySelector<HTMLParagraphElement>('.attachments-admin__row-status')!;
+    const file = target.files?.[0];
+    if (!file) return;
+
+    const form = new FormData();
+    form.append('file', file);
+
+    rowStatus.textContent = '교체하는 중...';
+    try {
+      const res = await fetch(`/api/attachments/${id}`, { method: 'PUT', body: form });
+      if (res.ok) {
+        rowStatus.textContent = '파일을 교체했어요. 주소는 그대로예요.';
+        const meta = row.querySelector<HTMLElement>('.attachments-admin__meta');
+        const data = (await res.json().catch(() => null)) as { size?: number } | null;
+        if (meta && data?.size) {
+          const sizeText = data.size < 1024 * 1024 ? `${Math.round(data.size / 1024)}KB` : `${(data.size / (1024 * 1024)).toFixed(1)}MB`;
+          meta.textContent = `${sizeText} · 방금 교체함`;
+        }
+      } else {
+        rowStatus.textContent = '⚠ 교체에 실패했어요.';
+      }
+    } catch {
+      rowStatus.textContent = '⚠ 교체 중 문제가 생겼어요.';
+    } finally {
+      target.value = '';
+    }
+  });
+</script>
+
+<style>
+  .attachments-admin {
+    max-width: 44rem;
+  }
+
+  .attachments-admin__hint {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: -0.5rem 0 1.5rem;
+  }
+
+  .attachments-admin__upload {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elevated);
+    margin-bottom: 0.5rem;
+  }
+
+  .write-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+
+  .write-field--grow {
+    flex: 1 1 12rem;
+  }
+
+  .write-field input[type='text'],
+  .write-field input[type='file'] {
+    font: inherit;
+    font-size: 0.9375rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.65rem;
+  }
+
+  .attachments-admin__status {
+    min-height: 1.2em;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .attachments-admin__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .attachments-admin__row {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.85rem 1rem;
+  }
+
+  .attachments-admin__head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .attachments-admin__meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .attachments-admin__actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .attachments-admin__url {
+    flex: 1 1 14rem;
+    font: inherit;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.4rem 0.6rem;
+  }
+
+  .write-btn {
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.45rem 0.85rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  .write-btn--primary {
+    color: var(--accent-contrast);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .write-btn--danger {
+    color: #c0392b;
+  }
+
+  .write-btn:hover {
+    opacity: 0.9;
+  }
+
+  .attachments-admin__row-status {
+    min-height: 1.2em;
+    margin: 0.4rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+</style>

@@ -43,6 +43,15 @@ CREATE TABLE IF NOT EXISTS pages (
 
 CREATE INDEX IF NOT EXISTS idx_pages_lang_nav ON pages (lang, published, nav_order);
 
+CREATE TABLE IF NOT EXISTS attachments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  slug TEXT NOT NULL UNIQUE,
+  label TEXT NOT NULL,
+  size INTEGER NOT NULL,
+  content_type TEXT,
+  uploaded_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS login_attempts (
   ip TEXT PRIMARY KEY,
   count INTEGER NOT NULL DEFAULT 0,
